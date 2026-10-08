@@ -25,6 +25,7 @@ deterministic seeded values already in the database and flag them honestly:
 """
 
 import math
+import time
 from datetime import datetime, timedelta, timezone
 
 import httpx
@@ -63,6 +64,33 @@ STATE = {
 def _chunked(items, size):
     for i in range(0, len(items), size):
         yield items[i : i + size]
+
+
+def _get_json(url: str, params: dict):
+    """GET JSON with retry + backoff for transient upstream failures.
+
+    Open-Meteo rate-limits per IP. Shared datacenter ranges (cloud hosts)
+    frequently get a 429 on the first back-to-back batched requests even
+    though the daily quota is fine, so retry with increasing waits before
+    giving up. 429/5xx are retryable; other 4xx fail immediately.
+    """
+    delay = 2.0
+    last_error: Exception | None = None
+    for attempt in range(4):
+        if attempt:
+            time.sleep(delay)
+            delay *= 2
+        try:
+            response = httpx.get(url, params=params, timeout=config.WEATHER_TIMEOUT_SECONDS)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as exc:
+            last_error = exc
+            if exc.response.status_code not in (429, 500, 502, 503, 504):
+                raise
+        except httpx.HTTPError as exc:
+            last_error = exc
+    raise last_error if last_error else RuntimeError("weather fetch failed")
 
 
 def _hour_index(hourly_times, current_time):
@@ -108,7 +136,8 @@ def fetch_open_meteo(db) -> bool:
     now = utcnow()
     STATE["last_attempt"] = now
 
-    for batch in _chunked(locations, 40):
+    batches = list(_chunked(locations, 40))
+    for batch_idx, batch in enumerate(batches):
         params = {
             "latitude": ",".join(f"{loc.latitude:.4f}" for loc in batch),
             "longitude": ",".join(f"{loc.longitude:.4f}" for loc in batch),
@@ -118,9 +147,7 @@ def fetch_open_meteo(db) -> bool:
             "forecast_days": 2,
             "timezone": "GMT",
         }
-        response = httpx.get(FORECAST_URL, params=params, timeout=config.WEATHER_TIMEOUT_SECONDS)
-        response.raise_for_status()
-        payload = response.json()
+        payload = _get_json(FORECAST_URL, params)
         rows = payload if isinstance(payload, list) else [payload]
 
         for loc, row in zip(batch, rows):
@@ -155,7 +182,13 @@ def fetch_open_meteo(db) -> bool:
                 )
             )
 
-    db.commit()
+        # commit per chunk: batches already fetched stay persisted even if a
+        # later batch ultimately fails, and pace requests to stay under the
+        # upstream burst limit.
+        db.commit()
+        if batch_idx < len(batches) - 1:
+            time.sleep(1.0)
+
     STATE["ok"] = True
     STATE["last_success"] = now
     STATE["error"] = None
@@ -213,7 +246,8 @@ def fetch_soil(db) -> bool:
         return False
 
     try:
-        for batch in _chunked(locations, 40):
+        batches = list(_chunked(locations, 40))
+        for batch_idx, batch in enumerate(batches):
             params = {
                 "latitude": ",".join(f"{loc.latitude:.4f}" for loc in batch),
                 "longitude": ",".join(f"{loc.longitude:.4f}" for loc in batch),
@@ -221,9 +255,7 @@ def fetch_soil(db) -> bool:
                 "past_days": 2,
                 "timezone": "GMT",
             }
-            response = httpx.get(ARCHIVE_URL, params=params, timeout=config.WEATHER_TIMEOUT_SECONDS)
-            response.raise_for_status()
-            payload = response.json()
+            payload = _get_json(ARCHIVE_URL, params)
             rows = payload if isinstance(payload, list) else [payload]
 
             for loc, row in zip(batch, rows):
@@ -248,7 +280,11 @@ def fetch_soil(db) -> bool:
                 loc.weather_source = "open-meteo"
                 _store_soil_snapshot(db, loc, layers, "open-meteo-reanalysis", "open-meteo-reanalysis", now)
 
-        db.commit()
+            # persist per chunk + pace requests (see fetch_open_meteo)
+            db.commit()
+            if batch_idx < len(batches) - 1:
+                time.sleep(1.0)
+
         STATE["soil_ok"] = True
         STATE["soil_last_success"] = now
         STATE["soil_error"] = None
