@@ -114,6 +114,10 @@ All endpoints below are prefixed with `/api` unless stated otherwise. All respon
   Unmeasured metrics must be `null` (UI renders NOT AVAILABLE).
 - `GET /api/pipeline` → `{components: [{name, status: ONLINE|DEGRADED|OFFLINE, detail, last_checked}],
   runs: [{job_name, status, started_at, finished_at, message}], meta}`
+- `GET /api/pipeline/open-meteo-probe?mode=minimal|batch&transport=direct|proxy` (ADMIN)
+  → `{transport, mode, endpoint_host, status_code, ok, elapsed_ms, body_excerpt, checked_at}`.
+  Server-side diagnostics: can THIS backend host reach the Open-Meteo forecast API right now
+  (returns the upstream status + body excerpt so rate-limit messages are visible).
 - `GET /api/settings` → `{thresholds: {critical, very_high, high, moderate}, region, language,
   refresh_interval_seconds, notifications: {...}, updated_at}`
 - `PATCH /api/settings` (ADMIN) → updated settings (persisted in `system_settings` table).

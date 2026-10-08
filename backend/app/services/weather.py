@@ -38,6 +38,13 @@ from app.services.common import age_seconds, build_meta, get_setting, iso, utcno
 FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 
+
+def _forecast_url() -> str:
+    """Direct forecast endpoint, or via the configured egress proxy."""
+    if config.OPENMETEO_PROXY_BASE_URL:
+        return f"{config.OPENMETEO_PROXY_BASE_URL}/v1/forecast"
+    return FORECAST_URL
+
 SOIL_VARS = (
     "soil_moisture_0_to_1cm,"
     "soil_moisture_1_to_3cm,"
@@ -147,7 +154,7 @@ def fetch_open_meteo(db) -> bool:
             "forecast_days": 2,
             "timezone": "GMT",
         }
-        payload = _get_json(FORECAST_URL, params)
+        payload = _get_json(_forecast_url(), params)
         rows = payload if isinstance(payload, list) else [payload]
 
         for loc, row in zip(batch, rows):

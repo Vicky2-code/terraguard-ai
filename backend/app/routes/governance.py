@@ -12,6 +12,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import func
+import httpx
+import time
 
 from app import config
 from app.database.db import get_db
@@ -211,6 +213,88 @@ def pipeline_jobs(db=Depends(get_db)):
             "refresh_interval_seconds": 60,
         },
     }
+
+
+@router.get("/pipeline/open-meteo-probe")
+def open_meteo_probe(
+    mode: str = "minimal",
+    transport: str = "direct",
+    db=Depends(get_db),
+    _user=Depends(require_admin),
+):
+    """Forecast-API reachability diagnostics from THIS host (ADMIN).
+
+    mode:
+      minimal - 1 location, current temperature only (is the endpoint/IP OK?)
+      batch   - first 40 locations with the production request shape
+    transport:
+      direct  - https://api.open-meteo.com
+      proxy   - OPENMETEO_PROXY_BASE_URL (e.g. the Vercel rewrite), if configured
+
+    Returns the upstream status code AND a body excerpt so rate-limit
+    messages ("daily limit exceeded" etc.) are visible, not just "429".
+    """
+    if transport == "direct":
+        base = "https://api.open-meteo.com/v1/forecast"
+    elif transport == "proxy":
+        if not config.OPENMETEO_PROXY_BASE_URL:
+            raise HTTPException(status_code=400, detail="OPENMETEO_PROXY_BASE_URL is not configured")
+        base = f"{config.OPENMETEO_PROXY_BASE_URL}/v1/forecast"
+    else:
+        raise HTTPException(status_code=400, detail="transport must be direct or proxy")
+
+    if mode == "minimal":
+        loc = db.query(Location).order_by(Location.id).first()
+        if loc is None:
+            raise HTTPException(status_code=400, detail="no locations seeded yet")
+        params = {
+            "latitude": f"{loc.latitude:.4f}",
+            "longitude": f"{loc.longitude:.4f}",
+            "current": "temperature_2m",
+            "timezone": "GMT",
+        }
+    elif mode == "batch":
+        rows = db.query(Location).order_by(Location.id).limit(40).all()
+        if not rows:
+            raise HTTPException(status_code=400, detail="no locations seeded yet")
+        params = {
+            "latitude": ",".join(f"{loc.latitude:.4f}" for loc in rows),
+            "longitude": ",".join(f"{loc.longitude:.4f}" for loc in rows),
+            "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,surface_pressure",
+            "hourly": "precipitation",
+            "past_days": 1,
+            "forecast_days": 2,
+            "timezone": "GMT",
+        }
+    else:
+        raise HTTPException(status_code=400, detail="mode must be minimal or batch")
+
+    started = time.perf_counter()
+    try:
+        response = httpx.get(base, params=params, timeout=config.WEATHER_TIMEOUT_SECONDS)
+        elapsed_ms = int((time.perf_counter() - started) * 1000)
+        return {
+            "transport": transport,
+            "mode": mode,
+            "endpoint_host": base.split("/")[2],
+            "status_code": response.status_code,
+            "ok": response.is_success,
+            "elapsed_ms": elapsed_ms,
+            "body_excerpt": response.text[:400],
+            "checked_at": iso(utcnow()),
+        }
+    except httpx.HTTPError as exc:
+        elapsed_ms = int((time.perf_counter() - started) * 1000)
+        return {
+            "transport": transport,
+            "mode": mode,
+            "endpoint_host": base.split("/")[2],
+            "status_code": None,
+            "ok": False,
+            "elapsed_ms": elapsed_ms,
+            "body_excerpt": str(exc)[:400],
+            "checked_at": iso(utcnow()),
+        }
 
 
 # ---------------------------------------------------------------------------

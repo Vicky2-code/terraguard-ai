@@ -104,6 +104,13 @@ LIVE_WEATHER_ENABLED = os.getenv("TERRAGUARD_LIVE_WEATHER", "1").strip().lower()
 
 WEATHER_TIMEOUT_SECONDS = float(os.getenv("WEATHER_TIMEOUT_SECONDS", "12"))
 
+# Optional egress proxy for the forecast API. Some shared datacenter egress
+# IPs (Render free tier) are rate-limited by Open-Meteo's keyless free tier
+# with HTTP 429. Set this to a same-app URL that rewrites to
+# https://api.open-meteo.com (see frontend/vercel.json "/api/open-meteo/:path*")
+# so forecast calls leave from a different egress IP. Empty = direct calls.
+OPENMETEO_PROXY_BASE_URL = os.getenv("OPENMETEO_PROXY_BASE_URL", "").rstrip("/")
+
 # ---------------------------------------------------------------------------
 # Pipeline cadence (seconds)
 # ---------------------------------------------------------------------------
