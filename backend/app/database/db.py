@@ -10,6 +10,13 @@ DATABASE_URL = os.getenv(
     "sqlite:///./terraguard.db",
 )
 
+# Hosts like Render / Railway / Supabase hand out `postgres://` URLs, and
+# SQLAlchemy 2 needs an explicit driver for the psycopg v3 driver we ship.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len("postgres://") :]
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len("postgresql://") :]
+
 connect_args = (
     {"check_same_thread": False}
     if DATABASE_URL.startswith("sqlite")
