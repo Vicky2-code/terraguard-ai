@@ -92,8 +92,10 @@ No API secrets ever ship in the browser bundle — weather ingestion happens ser
 | ----------------- | ----------------------------- | ------------------------------------------ |
 | `DATABASE_URL`    | `sqlite:///./terraguard.db`   | Any SQLAlchemy URL (Postgres in prod).     |
 | `JWT_SECRET`      | dev secret                    | **Change in production.**                  |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `60`              | JWT lifetime.                              |
 | `CORS_ORIGINS`    | `http://localhost:5173,...`   | Comma-separated allowed origins.           |
-| `WEATHER_PROVIDER`| `open-meteo`                  | Weather source (no key required).          |
+| `TERRAGUARD_LIVE_WEATHER` | `1`                | `0` forces deterministic fallback (tests). |
+| `WEATHER_TIMEOUT_SECONDS` | `12`               | Open-Meteo request timeout.                |
 
 See `backend/.env.example`.
 
