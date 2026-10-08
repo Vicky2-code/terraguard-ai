@@ -78,6 +78,11 @@ svg {
   background: #091122;
   font-family: inherit;
 }
+/* Keyless OpenStreetMap basemap re-toned to match the dark command center
+   (invert + hue-rotate restores hues: light tiles become dark, labels light). */
+.leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) saturate(0.8);
+}
 .leaflet-control-attribution {
   background: rgba(7, 11, 20, 0.82) !important;
   color: #64748b !important;

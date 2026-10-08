@@ -49,6 +49,8 @@ export function RiskMap({
   const [levels, setLevels] = useState<Set<RiskLevel>>(new Set(LEVEL_ORDER));
   const [query, setQuery] = useState("");
   const [center, setCenter] = useState<LatLngExpression>(NE_CENTER);
+  const [tileErrors, setTileErrors] = useState(0);
+  const basemapDown = tileErrors >= 3;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -132,20 +134,24 @@ export function RiskMap({
         </div>
       </div>
 
-      <MapContainer
-        center={center}
-        zoom={7}
-        minZoom={5}
-        maxZoom={13}
-        zoomControl={false}
-        className={height}
-        key={String(center)}
-      >
+      <div className="relative">
+        <MapContainer
+          center={center}
+          zoom={7}
+          minZoom={5}
+          maxZoom={13}
+          zoomControl={false}
+          className={height}
+          key={String(center)}
+        >
         <ZoomControl position="bottomright" />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          subdomains={["a", "b", "c", "d"]}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
+          eventHandlers={{
+            tileerror: () => setTileErrors((n) => n + 1),
+          }}
         />
         {visible.map((f) => {
           const color = RISK_COLORS[f.risk_level] ?? "#94a3b8";
@@ -228,7 +234,13 @@ export function RiskMap({
             </CircleMarker>
           );
         })}
-      </MapContainer>
+        </MapContainer>
+        {basemapDown && (
+          <div className="absolute top-2 left-2 z-[1000] px-2 py-1 rounded border border-amber-700/70 bg-amber-950/90 text-[9px] font-mono text-amber-300 max-w-[320px]">
+            BASEMAP TILES UNAVAILABLE (OPENSTREETMAP UNREACHABLE) — RISK MARKERS ONLY
+          </div>
+        )}
+      </div>
 
       {/* legend */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 border-t border-line bg-panel/80">
