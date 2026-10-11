@@ -26,11 +26,11 @@ import type { AnalyticsResponse, RiskMapResponse } from "../lib/types";
 
 const RANGES = ["24h", "7d", "30d"] as const;
 
-const AXIS = { stroke: "#475569", fontSize: 10, fontFamily: "ui-monospace, monospace" };
-const GRID = { stroke: "#1b2b4b", strokeDasharray: "3 3" };
+const AXIS = { stroke: "#4a6b5a", fontSize: 10, fontFamily: "ui-monospace, monospace" };
+const GRID = { stroke: "#16402c", strokeDasharray: "3 3" };
 const TOOLTIP_STYLE = {
-  background: "#0e172a",
-  border: "1px solid #1b2b4b",
+  background: "#0a2f1e",
+  border: "1px solid #16402c",
   borderRadius: 6,
   fontSize: 11,
   fontFamily: "ui-monospace, monospace",
@@ -78,7 +78,7 @@ export default function RiskAnalytics() {
                 onClick={() => setRange(r)}
                 className={`px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${
                   range === r
-                    ? "bg-sky-600/90 text-white"
+                    ? "bg-emerald-600/90 text-white"
                     : "bg-panel2 text-slate-400 hover:text-slate-200"
                 }`}
               >
@@ -106,7 +106,7 @@ export default function RiskAnalytics() {
         />
         <KpiCard
           label="ALERT RESPONSE"
-          tone="sky"
+          tone="green"
           icon={<BarChart3 className="w-4 h-4" />}
           loading={analytics.loading}
           value={
@@ -160,7 +160,7 @@ export default function RiskAnalytics() {
                 <CartesianGrid {...GRID} />
                 <XAxis dataKey="region" {...AXIS} interval={0} angle={-25} textAnchor="end" height={55} />
                 <YAxis {...AXIS} domain={[0, 100]} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1e315633" }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
                 <Bar dataKey="risk_score" name="Risk score">
                   {(a?.regional_risk ?? []).map((r) => (
                     <Cell
@@ -199,9 +199,9 @@ export default function RiskAnalytics() {
                 <CartesianGrid {...GRID} />
                 <XAxis dataKey="type" {...AXIS} interval={0} angle={-25} textAnchor="end" height={55} />
                 <YAxis {...AXIS} allowDecimals={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1e315633" }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
                 <Legend wrapperStyle={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }} />
-                <Bar dataKey="count" name="Incidents" fill="#22d3ee" />
+                <Bar dataKey="count" name="Incidents" fill="#34d399" />
               </BarChart>
             </ResponsiveContainer>
           </DataState>
@@ -251,7 +251,7 @@ export default function RiskAnalytics() {
                 <CartesianGrid {...GRID} />
                 <XAxis dataKey="band" {...AXIS} />
                 <YAxis {...AXIS} allowDecimals={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1e315633" }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
                 <Bar dataKey="count" name="Locations">
                   {buckets.map((_, i) => (
                     <Cell

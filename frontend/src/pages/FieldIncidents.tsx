@@ -23,7 +23,7 @@ const SEV_TONE: Record<string, string> = {
 
 const STATUS_TONE: Record<string, string> = {
   OPEN: "text-red-400 border-red-700",
-  INVESTIGATING: "text-sky-400 border-sky-700",
+  INVESTIGATING: "text-emerald-400 border-emerald-700",
   CONTAINED: "text-yellow-400 border-yellow-700",
   RESOLVED: "text-emerald-400 border-emerald-700",
   CLOSED: "text-slate-400 border-slate-600",
@@ -204,7 +204,7 @@ export default function FieldIncidents() {
               <tbody>
                 {slice.map((inc) => (
                   <tr key={inc.id} className="border-b border-line/50 hover:bg-slate-800/40 align-top">
-                    <td className="px-3 py-2 text-sky-400 font-bold whitespace-nowrap">
+                    <td className="px-3 py-2 text-emerald-400 font-bold whitespace-nowrap">
                       {inc.public_id}
                     </td>
                     <td className="px-3 py-2 text-slate-300">{inc.type}</td>

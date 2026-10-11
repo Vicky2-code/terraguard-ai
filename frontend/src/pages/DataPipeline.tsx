@@ -13,7 +13,7 @@ const STATUS_TONE: Record<string, string> = {
   HEALTHY: "text-emerald-400 border-emerald-700",
   DEGRADED2: "text-amber-400 border-amber-700",
   SUCCESS: "text-emerald-400 border-emerald-700",
-  RUNNING: "text-sky-400 border-sky-700",
+  RUNNING: "text-emerald-400 border-emerald-700",
   FAILED: "text-red-400 border-red-700",
   ERROR: "text-red-400 border-red-700",
   COMPLETED: "text-emerald-400 border-emerald-700",

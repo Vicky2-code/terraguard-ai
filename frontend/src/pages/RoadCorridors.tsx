@@ -51,7 +51,7 @@ export default function RoadCorridors() {
             {items.map((c) => (
               <div
                 key={c.id}
-                className="rounded-lg border border-line bg-panel2 p-3 space-y-2 hover:border-sky-800/60 transition-colors"
+                className="rounded-lg border border-line bg-panel2 p-3 space-y-2 hover:border-emerald-800/60 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">

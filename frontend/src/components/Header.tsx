@@ -31,7 +31,7 @@ function Pill({
   label,
   dot,
 }: {
-  tone: "green" | "amber" | "red" | "sky" | "slate";
+  tone: "green" | "amber" | "red" | "slate";
   label: string;
   dot?: boolean;
 }) {
@@ -39,7 +39,6 @@ function Pill({
     green: "border-emerald-700/60 text-emerald-400 bg-emerald-950/40",
     amber: "border-amber-700/60 text-amber-400 bg-amber-950/40",
     red: "border-red-700/60 text-red-400 bg-red-950/40",
-    sky: "border-sky-700/60 text-sky-400 bg-sky-950/40",
     slate: "border-slate-600/60 text-slate-400 bg-slate-800/40",
   } as const;
   return (
@@ -148,12 +147,14 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
             <Menu className="w-4 h-4" />
           </button>
           <Link to="/dashboard" className="flex items-center gap-2.5 group min-w-0">
-            <div className="w-9 h-9 rounded bg-red-600/20 border border-red-500/50 flex items-center justify-center text-red-400 group-hover:border-red-400 transition-colors shrink-0">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
+            <img
+              src="/favicon.svg"
+              alt="TerraGuard AI logo"
+              className="w-9 h-9 rounded-lg shrink-0 ring-1 ring-emerald-500/40 group-hover:ring-emerald-400/70 transition-shadow"
+            />
             <div className="min-w-0">
               <div className="text-[13px] font-black font-mono tracking-[0.2em] text-slate-100 leading-tight whitespace-nowrap">
-                TERRAGUARD <span className="text-sky-400">AI</span>
+                TERRAGUARD <span className="text-emerald-400">AI</span>
               </div>
               <p className="text-[9px] text-slate-500 hidden sm:block tracking-wide font-mono truncate">
                 NER Early Warning &amp; Landslide Risk Monitoring Center
@@ -173,7 +174,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
             dot
           />
           <Pill
-            tone={!lastSyncAt && status !== "OFFLINE" ? "amber" : stale ? "amber" : "sky"}
+            tone={!lastSyncAt && status !== "OFFLINE" ? "amber" : stale ? "amber" : "green"}
             label={
               !lastSyncAt
                 ? status === "OFFLINE"
@@ -272,7 +273,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
           dot
         />
         <Pill
-          tone={!lastSyncAt && status !== "OFFLINE" ? "amber" : stale ? "amber" : "sky"}
+          tone={!lastSyncAt && status !== "OFFLINE" ? "amber" : stale ? "amber" : "green"}
           label={
             !lastSyncAt
               ? status === "OFFLINE"

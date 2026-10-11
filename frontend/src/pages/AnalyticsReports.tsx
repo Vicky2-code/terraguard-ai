@@ -23,11 +23,11 @@ import { getJSON } from "../lib/api";
 import type { AnalyticsResponse, TemporalResponse } from "../lib/types";
 
 const RANGES = ["24h", "7d", "30d"] as const;
-const AXIS = { stroke: "#475569", fontSize: 10, fontFamily: "ui-monospace, monospace" };
-const GRID = { stroke: "#1b2b4b", strokeDasharray: "3 3" };
+const AXIS = { stroke: "#4a6b5a", fontSize: 10, fontFamily: "ui-monospace, monospace" };
+const GRID = { stroke: "#16402c", strokeDasharray: "3 3" };
 const TOOLTIP_STYLE = {
-  background: "#0e172a",
-  border: "1px solid #1b2b4b",
+  background: "#0a2f1e",
+  border: "1px solid #16402c",
   borderRadius: 6,
   fontSize: 11,
   fontFamily: "ui-monospace, monospace",
@@ -75,7 +75,7 @@ export default function AnalyticsReports() {
                 key={r}
                 onClick={() => setRange(r)}
                 className={`px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider ${
-                  range === r ? "bg-sky-600/90 text-white" : "bg-panel2 text-slate-400 hover:text-slate-200"
+                  range === r ? "bg-emerald-600/90 text-white" : "bg-panel2 text-slate-400 hover:text-slate-200"
                 }`}
               >
                 {r}
@@ -145,10 +145,10 @@ export default function AnalyticsReports() {
                 <CartesianGrid {...GRID} />
                 <XAxis dataKey="time" {...AXIS} />
                 <YAxis {...AXIS} allowDecimals={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1e315633" }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
                 <Bar dataKey="value" name="Rainfall (mm)">
                   {(t?.rainfall ?? []).map((_, i) => (
-                    <Cell key={i} fill="#22d3ee" />
+                    <Cell key={i} fill="#34d399" />
                   ))}
                 </Bar>
               </BarChart>

@@ -139,7 +139,7 @@ export default function GisMonitor() {
                     <button
                       onClick={() => setSelected(f)}
                       className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-800/50 transition-colors ${
-                        selected?.id === f.id ? "bg-sky-950/40" : ""
+                        selected?.id === f.id ? "bg-emerald-950/40" : ""
                       }`}
                     >
                       <span

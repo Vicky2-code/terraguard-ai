@@ -17,7 +17,7 @@ const STATUS_TONE: Record<string, string> = {
   SATURATED: "text-red-400 border-red-700",
   HIGH: "text-orange-400 border-orange-700",
   NORMAL: "text-emerald-400 border-emerald-700",
-  DRY: "text-sky-400 border-sky-700",
+  DRY: "text-emerald-400 border-emerald-700",
   DEMO: "text-purple-400 border-purple-700",
 };
 
@@ -112,7 +112,7 @@ export default function SoilMoisture() {
                           ? "bg-red-500/80"
                           : layer.saturation_pct >= 60
                             ? "bg-orange-500/80"
-                            : "bg-sky-500/80"
+                            : "bg-emerald-500/80"
                       }`}
                       style={{ width: `${Math.min(100, layer.saturation_pct)}%` }}
                     />

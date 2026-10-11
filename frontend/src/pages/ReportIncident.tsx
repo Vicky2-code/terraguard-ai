@@ -139,7 +139,7 @@ export default function ReportIncident() {
         title="Report Incident"
         subtitle="FIELD OFFICER INTAKE · VALIDATED CLIENT-SIDE AND SERVER-SIDE · POSTGRESQL PERSISTENCE"
       />
-      <Notice tone="sky" title="PERSISTENT">
+      <Notice tone="green" title="PERSISTENT">
         Incidents are stored in PostgreSQL (not browser localStorage) and appear everywhere in the
         platform after submission.
       </Notice>

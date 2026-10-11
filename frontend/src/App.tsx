@@ -36,7 +36,7 @@ function NotFound() {
           </div>
           <a
             href="/dashboard"
-            className="inline-flex px-3 py-1.5 rounded text-xs font-mono font-bold uppercase tracking-wider border border-sky-700 text-sky-300 hover:bg-sky-900/40"
+            className="inline-flex px-3 py-1.5 rounded text-xs font-mono font-bold uppercase tracking-wider border border-emerald-700 text-emerald-300 hover:bg-emerald-900/40"
           >
             Back to dashboard
           </a>

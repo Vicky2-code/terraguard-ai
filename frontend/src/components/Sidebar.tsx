@@ -175,7 +175,7 @@ export function Sidebar({
                           showFull ? "" : "justify-center px-1.5"
                         } ${
                           isActive
-                            ? "bg-sky-950/50 border-l-sky-400 text-sky-300 font-bold"
+                            ? "bg-emerald-950/50 border-l-emerald-400 text-emerald-300 font-bold"
                             : "border-l-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 hover:border-l-slate-600"
                         }`
                       }
@@ -214,7 +214,7 @@ export function Sidebar({
 
         <button
           onClick={onToggle}
-          className="hidden lg:flex items-center justify-center gap-1 py-2 border-t border-line2 text-[10px] font-mono text-slate-500 hover:text-sky-400 hover:bg-slate-800/50 transition-colors sticky bottom-0 bg-panel2"
+          className="hidden lg:flex items-center justify-center gap-1 py-2 border-t border-line2 text-[10px] font-mono text-slate-500 hover:text-emerald-400 hover:bg-slate-800/50 transition-colors sticky bottom-0 bg-panel2"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? "»" : "« COLLAPSE"}

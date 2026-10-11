@@ -89,7 +89,7 @@ export default function RiskSimulator() {
                     setValues({ ...p.values });
                     setError(null);
                   }}
-                  className="px-2 py-1 rounded border border-line bg-panel2 text-[9px] font-mono font-bold tracking-wider text-slate-400 hover:text-sky-300 hover:border-sky-700 uppercase"
+                  className="px-2 py-1 rounded border border-line bg-panel2 text-[9px] font-mono font-bold tracking-wider text-slate-400 hover:text-emerald-300 hover:border-emerald-700 uppercase"
                 >
                   {p.name}
                 </button>
@@ -109,7 +109,7 @@ export default function RiskSimulator() {
                   onChange={(e) =>
                     setValues((v) => ({ ...v, [s.key]: Number(e.target.value) }))
                   }
-                  className="w-full accent-sky-500"
+                  className="w-full accent-emerald-500"
                 />
                 <div className="flex justify-between text-[9px] font-mono text-slate-600">
                   <span>{s.min}</span>
@@ -176,7 +176,7 @@ export default function RiskSimulator() {
           )}
           {!result && !error && (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-slate-500 font-mono text-[11px]">
-              <div className="w-7 h-7 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+              <div className="w-7 h-7 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
               <span className="tracking-widest">SCORING…</span>
             </div>
           )}

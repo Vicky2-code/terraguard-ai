@@ -110,7 +110,7 @@ export default function CriticalInfrastructure() {
                   <button
                     onClick={() => setSelected(i)}
                     className={`w-full text-left px-3 py-2.5 hover:bg-slate-800/50 transition-colors ${
-                      selected?.id === i.id ? "bg-sky-950/40" : ""
+                      selected?.id === i.id ? "bg-emerald-950/40" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">

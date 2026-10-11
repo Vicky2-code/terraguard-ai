@@ -40,7 +40,7 @@ const KPI_DEFS: {
   key: string;
   label: string;
   icon: React.ReactNode;
-  tone: "sky" | "red" | "orange" | "green" | "purple" | "amber";
+  tone: "red" | "orange" | "green" | "purple" | "amber";
   to: string;
   pulse?: boolean;
 }[] = [
@@ -48,7 +48,7 @@ const KPI_DEFS: {
     key: "monitored_locations",
     label: "MONITORED LOCATIONS",
     icon: <MapPin className="w-4 h-4" />,
-    tone: "sky",
+    tone: "green",
     to: "/gis-monitor",
   },
   {
@@ -89,7 +89,7 @@ const SEV_TONE: Record<string, string> = {
   MEDIUM: "text-yellow-400 border-yellow-700/60",
   MODERATE: "text-yellow-400 border-yellow-700/60",
   LOW: "text-emerald-400 border-emerald-700/60",
-  INFO: "text-sky-400 border-sky-700/60",
+  INFO: "text-emerald-400 border-emerald-700/60",
 };
 
 export default function Dashboard() {
@@ -212,7 +212,7 @@ export default function Dashboard() {
         />
         <KpiCard
           label="RAIN SIGNAL"
-          tone="sky"
+          tone="green"
           loading={map.loading}
           icon={<CloudRain className="w-4 h-4" />}
           value={
@@ -236,7 +236,7 @@ export default function Dashboard() {
             actions={
               <Link
                 to="/gis-monitor"
-                className="flex items-center gap-1 text-[10px] font-mono text-sky-400 hover:text-sky-300 uppercase tracking-wider"
+                className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
               >
                 Full monitor <ArrowRight className="w-3 h-3" />
               </Link>
@@ -270,7 +270,7 @@ export default function Dashboard() {
             actions={
               <Link
                 to="/early-alerts"
-                className="text-[10px] font-mono text-sky-400 hover:text-sky-300 uppercase tracking-wider"
+                className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
               >
                 All
               </Link>

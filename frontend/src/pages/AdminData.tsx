@@ -62,7 +62,7 @@ export default function AdminData() {
   return (
     <div>
       <PageHeader title="Admin / Data" subtitle="TABLE INVENTORY, DATABASE AND SEED STATUS" />
-      <Notice tone="sky" title="READ-ONLY ADMIN VIEW">
+      <Notice tone="green" title="READ-ONLY ADMIN VIEW">
         Record counts are read live from API endpoints. Destructive admin operations are not exposed
         from the UI — use the API directly with an ADMIN token if required.
       </Notice>
@@ -70,7 +70,7 @@ export default function AdminData() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 my-4">
         <KpiCard
           label="LOCATIONS"
-          tone="sky"
+          tone="green"
           icon={<Table2 className="w-4 h-4" />}
           loading={locations.loading}
           value={locations.error ? "—" : String(tableCounts.locations)}

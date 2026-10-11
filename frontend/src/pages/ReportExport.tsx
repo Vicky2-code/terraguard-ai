@@ -63,7 +63,7 @@ export default function ReportExport() {
         title="Report Export"
         subtitle="REAL FILE DOWNLOADS FROM /api/export — CSV ROWS COME FROM POSTGRESQL, NOT THE BROWSER"
       />
-      <Notice tone="sky" title="HONEST EXPORT">
+      <Notice tone="green" title="HONEST EXPORT">
         The CSV is streamed by FastAPI directly from database rows. If the API is unreachable the
         download fails loudly instead of exporting stale client cache.
       </Notice>
@@ -81,7 +81,7 @@ export default function ReportExport() {
                     key={d.key}
                     className={`flex items-center gap-2 rounded border px-2.5 py-2 cursor-pointer transition-colors ${
                       dataset === d.key
-                        ? "border-sky-600 bg-sky-950/40"
+                        ? "border-emerald-600 bg-emerald-950/40"
                         : "border-line bg-panel2 hover:border-slate-600"
                     }`}
                   >
@@ -90,7 +90,7 @@ export default function ReportExport() {
                       name="dataset"
                       checked={dataset === d.key}
                       onChange={() => setDataset(d.key)}
-                      className="accent-sky-500"
+                      className="accent-emerald-500"
                     />
                     <span className="text-[11px] font-mono text-slate-300">{d.label}</span>
                   </label>
@@ -109,7 +109,7 @@ export default function ReportExport() {
                     onClick={() => setFormat(f)}
                     className={`flex-1 py-1.5 rounded border text-[11px] font-mono font-bold uppercase ${
                       format === f
-                        ? "border-sky-500 bg-sky-600/30 text-sky-300"
+                        ? "border-emerald-500 bg-emerald-600/30 text-emerald-300"
                         : "border-line bg-panel2 text-slate-400"
                     }`}
                   >
@@ -187,7 +187,7 @@ export default function ReportExport() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="rounded border border-line bg-panel2 p-3">
                 <div className="text-[10px] font-mono text-slate-500 uppercase">Records</div>
-                <div className="text-2xl font-black font-mono text-sky-400 tabular-nums">
+                <div className="text-2xl font-black font-mono text-emerald-400 tabular-nums">
                   {counts.loading ? "…" : counts.error ? "—" : (count ?? "—")}
                 </div>
                 <div className="text-[9px] font-mono text-slate-600 truncate">
@@ -215,7 +215,7 @@ export default function ReportExport() {
               <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 Endpoint
               </div>
-              <div className="text-sky-400 break-all">
+              <div className="text-emerald-400 break-all">
                 GET /api/export?dataset={dataset}&amp;format={format}
                 {from && `&from=${from}`}
                 {to && `&to=${to}`}

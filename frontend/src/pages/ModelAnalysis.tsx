@@ -80,7 +80,7 @@ export default function ModelAnalysis() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 my-4">
         <KpiCard
           label="MODEL"
-          tone="sky"
+          tone="green"
           icon={<Brain className="w-4 h-4" />}
           loading={models.loading}
           value={<span className="text-base">HEURISTIC v1</span>}
@@ -142,7 +142,7 @@ export default function ModelAnalysis() {
 
             {detailLoading && (
               <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
-                <div className="w-5 h-5 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+                <div className="w-5 h-5 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
                 LOADING ZONE DETAIL…
               </div>
             )}

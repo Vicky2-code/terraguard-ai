@@ -51,13 +51,13 @@ export function Panel({
 /* KPI card                                                             */
 /* ------------------------------------------------------------------ */
 
-export type CardTone = "sky" | "red" | "orange" | "green" | "purple" | "amber";
+export type CardTone = "green" | "red" | "orange" | "purple" | "amber";
 
 const TONES: Record<CardTone, { box: string; value: string; icon: string }> = {
-  sky: {
-    box: "bg-sky-950/30 border-sky-800/40",
-    value: "text-sky-400",
-    icon: "text-sky-400",
+  green: {
+    box: "bg-emerald-950/30 border-emerald-800/40",
+    value: "text-emerald-400",
+    icon: "text-emerald-400",
   },
   red: {
     box: "bg-red-950/40 border-red-800/60 shadow-lg shadow-red-950/30",
@@ -68,11 +68,6 @@ const TONES: Record<CardTone, { box: string; value: string; icon: string }> = {
     box: "bg-orange-950/40 border-orange-800/50",
     value: "text-orange-400",
     icon: "text-orange-400",
-  },
-  green: {
-    box: "bg-emerald-950/40 border-emerald-800/50",
-    value: "text-emerald-400",
-    icon: "text-emerald-400",
   },
   purple: {
     box: "bg-purple-950/40 border-purple-800/50",
@@ -91,7 +86,7 @@ export function KpiCard({
   value,
   sub,
   icon,
-  tone = "sky",
+  tone = "green",
   pulse,
   loading,
 }: {
@@ -135,7 +130,7 @@ export function KpiCard({
 export function LoadingBlock({ label = "LOADING DATA…" }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8 text-slate-400 font-mono text-xs">
-      <div className="w-7 h-7 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+      <div className="w-7 h-7 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
       <span className="tracking-widest">{label}</span>
     </div>
   );
@@ -150,7 +145,7 @@ export function ErrorBlock({ message, onRetry }: { message: string; onRetry?: ()
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider border border-sky-700 text-sky-300 hover:bg-sky-900/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider border border-emerald-700 text-emerald-300 hover:bg-emerald-900/40 transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry
         </button>
@@ -208,9 +203,9 @@ const STATUS_STYLE: Record<string, string> = {
   DEMO: "text-purple-400 border-purple-700/60",
   UNAVAILABLE: "text-red-400 border-red-700/60",
   OFFLINE: "text-red-400 border-red-700/60",
-  SYNCING: "text-sky-400 border-sky-700/60",
+  SYNCING: "text-emerald-400 border-emerald-700/60",
   CONNECTING: "text-amber-400 border-amber-700/60",
-  LOADING: "text-sky-400 border-sky-700/60",
+  LOADING: "text-emerald-400 border-emerald-700/60",
 };
 
 export function StatusPill({
@@ -329,10 +324,10 @@ export function Field({
 }
 
 export const inputCls =
-  "w-full bg-panel2 border border-line rounded px-2.5 py-2 sm:py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:border-sky-600 focus:outline-none transition-colors";
+  "w-full bg-panel2 border border-line rounded px-2.5 py-2 sm:py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:border-emerald-600 focus:outline-none transition-colors";
 
 export const btnPrimary =
-  "flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-sky-600/90 hover:bg-sky-500 text-white border-sky-400 disabled:opacity-50 disabled:cursor-not-allowed";
+  "flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-emerald-600/90 hover:bg-emerald-500 text-white border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export const btnGhost =
   "flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed";
@@ -356,7 +351,7 @@ export function PageHeader({
     <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
-          <span className="w-1 h-5 bg-sky-500 rounded-sm" />
+          <span className="w-1 h-5 bg-emerald-500 rounded-sm" />
           <h1 className="text-lg font-black font-mono uppercase tracking-[0.18em] text-slate-100">
             {title}
           </h1>
@@ -377,7 +372,7 @@ export function Notice({
   title,
   children,
 }: {
-  tone?: "amber" | "red" | "purple" | "sky";
+  tone?: "amber" | "red" | "purple" | "green";
   title: string;
   children?: ReactNode;
 }) {
@@ -385,7 +380,7 @@ export function Notice({
     amber: "border-amber-700/50 bg-amber-950/30 text-amber-200",
     red: "border-red-700/50 bg-red-950/30 text-red-200",
     purple: "border-purple-700/50 bg-purple-950/30 text-purple-200",
-    sky: "border-sky-700/50 bg-sky-950/30 text-sky-200",
+    green: "border-emerald-700/50 bg-emerald-950/30 text-emerald-200",
   } as const;
   return (
     <div className={`rounded border px-3 py-2 text-[11px] font-mono leading-relaxed ${tones[tone]}`}>

@@ -92,7 +92,7 @@ export default function Settings() {
 
       {!user && (
         <div className="mb-4">
-          <Notice tone="sky" title="PUBLIC READ, AUTHENTICATED WRITE">
+          <Notice tone="green" title="PUBLIC READ, AUTHENTICATED WRITE">
             Most pages work without signing in. Saving settings requires an ADMIN token — sign in
             below (seeds are listed in the README).
           </Notice>
@@ -117,7 +117,7 @@ export default function Settings() {
                     min={1}
                     max={100}
                     disabled={!form || !roleAdmin}
-                    className="w-full bg-ink border border-line rounded px-1 py-1 text-xs font-mono text-slate-200 text-center tabular-nums focus:border-sky-600 focus:outline-none disabled:opacity-50"
+                    className="w-full bg-ink border border-line rounded px-1 py-1 text-xs font-mono text-slate-200 text-center tabular-nums focus:border-emerald-600 focus:outline-none disabled:opacity-50"
                     value={form ? form.thresholds[b.key] : ""}
                     onChange={(e) =>
                       setForm((f) =>
@@ -224,7 +224,7 @@ export default function Settings() {
                         : f,
                     )
                   }
-                  className="accent-sky-500 w-4 h-4"
+                  className="accent-emerald-500 w-4 h-4"
                 />
               </label>
             ))}
@@ -248,7 +248,7 @@ export default function Settings() {
                 </div>
                 <div className="flex justify-between text-[11px] font-mono">
                   <span className="text-slate-500">ROLE</span>
-                  <span className="text-sky-400 font-bold">{user.role}</span>
+                  <span className="text-emerald-400 font-bold">{user.role}</span>
                 </div>
               </div>
               <div className="text-[10px] font-mono text-slate-600">

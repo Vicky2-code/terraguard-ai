@@ -78,7 +78,7 @@ export default function WeatherRadar() {
         />
         <KpiCard
           label="HUMIDITY"
-          tone="sky"
+          tone="green"
           icon={<CloudRain className="w-4 h-4" />}
           loading={weather.loading}
           value={w ? `${w.humidity_pct}%` : "—"}
@@ -128,7 +128,7 @@ export default function WeatherRadar() {
                   className="flex-1 min-w-0 group relative"
                   style={{ height: `${Math.max(3, (s.rainfall_mm / maxRain) * 100)}%` }}
                 >
-                  <div className="w-full h-full bg-sky-600/70 rounded-t group-hover:bg-sky-400 transition-colors" />
+                  <div className="w-full h-full bg-emerald-600/70 rounded-t group-hover:bg-emerald-400 transition-colors" />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-panel border border-line rounded px-1.5 py-1 text-[9px] font-mono text-slate-200 whitespace-nowrap z-10">
                     {s.rainfall_mm}mm · {s.temperature_c}°C
                   </div>

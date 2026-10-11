@@ -208,7 +208,7 @@ export default function EarlyAlerts() {
         {/* thresholds */}
         <Panel title="ALERT THRESHOLDS" icon={<Sliders className="w-3.5 h-3.5" />}>
           <div className="space-y-3">
-            <Notice tone="sky" title="CONFIGURABLE">
+            <Notice tone="green" title="CONFIGURABLE">
               Band edges are validated server-side. LOW occupies everything below the MODERATE edge.
             </Notice>
 
@@ -227,7 +227,7 @@ export default function EarlyAlerts() {
                     min={1}
                     max={100}
                     disabled={!thresholds}
-                    className="w-full bg-ink border border-line rounded px-1.5 py-1 text-xs font-mono text-slate-200 text-center tabular-nums focus:border-sky-600 focus:outline-none"
+                    className="w-full bg-ink border border-line rounded px-1.5 py-1 text-xs font-mono text-slate-200 text-center tabular-nums focus:border-emerald-600 focus:outline-none"
                     value={thresholds ? thresholds[b.key] : ""}
                     onChange={(e) =>
                       setThresholds((t) =>

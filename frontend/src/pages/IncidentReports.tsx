@@ -81,7 +81,7 @@ export default function IncidentReports() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 my-4">
         <KpiCard
           label="TOTAL INCIDENTS"
-          tone="sky"
+          tone="green"
           icon={<FileBarChart className="w-4 h-4" />}
           loading={incidents.loading}
           value={incidents.error ? "—" : String(incidents.data?.total ?? items.length)}
@@ -152,7 +152,7 @@ export default function IncidentReports() {
               {Object.entries(stats.byType)
                 .sort((a, b) => b[1] - a[1])
                 .map(([k, v], i) => (
-                  <BarRow key={k} label={k} value={v} total={items.length} color={["#22d3ee", "#a855f7", "#f97316", "#22c55e", "#ef4444", "#eab308"][i % 6]} />
+                  <BarRow key={k} label={k} value={v} total={items.length} color={["#34d399", "#2dd4bf", "#f97316", "#22c55e", "#ef4444", "#eab308"][i % 6]} />
                 ))}
             </div>
           </DataState>
@@ -171,7 +171,7 @@ export default function IncidentReports() {
               {Object.entries(stats.byRegion)
                 .sort((a, b) => b[1] - a[1])
                 .map(([k, v]) => (
-                  <BarRow key={k} label={k} value={v} total={items.length} color="#6366f1" />
+                  <BarRow key={k} label={k} value={v} total={items.length} color="#059669" />
                 ))}
             </div>
           </DataState>
@@ -210,7 +210,7 @@ export default function IncidentReports() {
               <tbody>
                 {filtered.slice(0, 50).map((i) => (
                   <tr key={i.id} className="border-b border-line/50 hover:bg-slate-800/40">
-                    <td className="px-3 py-1.5 text-sky-400">{i.public_id}</td>
+                    <td className="px-3 py-1.5 text-emerald-400">{i.public_id}</td>
                     <td className="px-3 py-1.5 text-slate-300">{i.type}</td>
                     <td className="px-3 py-1.5 text-slate-300 truncate max-w-[200px]">{i.location_name}</td>
                     <td className="px-3 py-1.5 text-slate-400">{i.severity}</td>

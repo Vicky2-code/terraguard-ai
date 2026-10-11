@@ -18,11 +18,11 @@ import type { TemporalResponse } from "../lib/types";
 const RANGES = ["24h", "7d", "30d"] as const;
 const GRANULARITIES = ["hour", "day", "week"] as const;
 
-const AXIS = { stroke: "#475569", fontSize: 10, fontFamily: "ui-monospace, monospace" };
-const GRID = { stroke: "#1b2b4b", strokeDasharray: "3 3" };
+const AXIS = { stroke: "#4a6b5a", fontSize: 10, fontFamily: "ui-monospace, monospace" };
+const GRID = { stroke: "#16402c", strokeDasharray: "3 3" };
 const TOOLTIP_STYLE = {
-  background: "#0e172a",
-  border: "1px solid #1b2b4b",
+  background: "#0a2f1e",
+  border: "1px solid #16402c",
   borderRadius: 6,
   fontSize: 11,
   fontFamily: "ui-monospace, monospace",
@@ -42,9 +42,9 @@ export default function TemporalAnalysis() {
   const t = temporal.data;
 
   const charts: { title: string; key: keyof TemporalResponse; color: string; unit: string }[] = [
-    { title: "RAINFALL", key: "rainfall", color: "#22d3ee", unit: "mm" },
+    { title: "RAINFALL", key: "rainfall", color: "#34d399", unit: "mm" },
     { title: "RISK SCORE (AVG)", key: "risk", color: "#f97316", unit: "pts" },
-    { title: "INCIDENTS", key: "incidents", color: "#a855f7", unit: "count" },
+    { title: "INCIDENTS", key: "incidents", color: "#2dd4bf", unit: "count" },
     { title: "ALERTS", key: "alerts", color: "#ef4444", unit: "count" },
   ];
 
@@ -62,7 +62,7 @@ export default function TemporalAnalysis() {
                   onClick={() => setRange(r)}
                   className={`px-2.5 py-1.5 text-[10px] font-mono font-bold uppercase ${
                     range === r
-                      ? "bg-sky-600/90 text-white"
+                      ? "bg-emerald-600/90 text-white"
                       : "bg-panel2 text-slate-400 hover:text-slate-200"
                   }`}
                 >
