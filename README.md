@@ -96,6 +96,7 @@ No API secrets ever ship in the browser bundle — weather ingestion happens ser
 | `CORS_ORIGINS`    | `http://localhost:5173,...`   | Comma-separated allowed origins.           |
 | `TERRAGUARD_LIVE_WEATHER` | `1`                | `0` forces deterministic fallback (tests). |
 | `WEATHER_TIMEOUT_SECONDS` | `12`               | Open-Meteo request timeout.                |
+| `OPENMETEO_PROXY_BASE_URL` | *(empty)*         | Optional egress proxy for forecasts; **include the path prefix** (e.g. `https://app.vercel.app/api/open-meteo`). |
 
 See `backend/.env.example`.
 
