@@ -96,7 +96,7 @@ export default function TemporalAnalysis() {
         onRetry={temporal.refetch}
         loadingLabel="LOADING TIME SERIES…"
       >
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {charts.map((c) => {
             const data = (t?.[c.key] ?? []) as { time: string; value: number }[];
             return (

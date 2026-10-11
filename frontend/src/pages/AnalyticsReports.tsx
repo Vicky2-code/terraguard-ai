@@ -85,7 +85,7 @@ export default function AnalyticsReports() {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Panel title="KPI SUMMARY" icon={<Table2 className="w-3.5 h-3.5" />} bodyClassName="p-0">
           <DataState
             loading={analytics.loading}
@@ -122,7 +122,7 @@ export default function AnalyticsReports() {
           <SourceStrip meta={a?.meta ?? null} />
         </Panel>
 
-        <Panel className="xl:col-span-2" title="RISK & RAINFALL TREND" icon={<Table2 className="w-3.5 h-3.5" />}>
+        <Panel className="lg:col-span-2" title="RISK & RAINFALL TREND" icon={<Table2 className="w-3.5 h-3.5" />}>
           <DataState
             loading={temporal.loading}
             error={temporal.error}

@@ -111,8 +111,8 @@ export default function WeatherRadar() {
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Panel className="xl:col-span-2" title="RAINFALL — LAST 24H (HOURLY)" icon={<CloudRain className="w-3.5 h-3.5" />}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Panel className="lg:col-span-2" title="RAINFALL — LAST 24H (HOURLY)" icon={<CloudRain className="w-3.5 h-3.5" />}>
           <DataState
             loading={history.loading}
             error={history.error}

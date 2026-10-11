@@ -60,8 +60,8 @@ export default function CriticalInfrastructure() {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <Panel title="ASSET EXPOSURE MAP" icon={<MapPin className="w-3.5 h-3.5" />} bodyClassName="p-2">
             <DataState
               loading={assets.loading}
@@ -73,7 +73,7 @@ export default function CriticalInfrastructure() {
             >
               <RiskMap
                 features={toFeatures(items)}
-                height="h-[440px]"
+                height="h-[320px] sm:h-[400px] xl:h-[440px]"
                 selectedId={selected?.id ?? null}
                 onSelect={(f) =>
                   setSelected(f ? (items.find((i) => i.id === f.id) ?? null) : null)

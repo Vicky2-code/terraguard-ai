@@ -112,7 +112,7 @@ export default function ModelAnalysis() {
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* per-location explanation */}
         <Panel title="PER-ZONE EXPLANATION" icon={<Brain className="w-3.5 h-3.5" />}>
           <div className="space-y-3">

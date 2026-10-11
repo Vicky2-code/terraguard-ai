@@ -40,6 +40,21 @@ export function AppShell() {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  // lock background scroll + support Escape while the mobile drawer is open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
   // sign-out helper passed to header
   const signOut = useCallback(() => {
     setToken(null);

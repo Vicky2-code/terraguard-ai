@@ -110,7 +110,7 @@ export default function FieldIncidents() {
         bodyClassName="p-3 space-y-2"
         className="mb-4"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2">
           <input
             className={inputCls + " lg:col-span-2"}
             placeholder="SEARCH ID / TYPE / LOCATION…"

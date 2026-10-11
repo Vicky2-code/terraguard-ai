@@ -142,7 +142,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden p-1.5 rounded hover:bg-slate-800 text-slate-400 border border-slate-700/60"
+            className="lg:hidden p-2 sm:p-1.5 rounded hover:bg-slate-800 text-slate-400 border border-slate-700/60"
             aria-label="Toggle navigation"
           >
             <Menu className="w-4 h-4" />

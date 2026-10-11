@@ -66,7 +66,7 @@ export default function ModelGovernance() {
         would require real training/evaluation data are explicitly marked NOT AVAILABLE.
       </Notice>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <Panel title="MODEL REGISTRY" icon={<ShieldCheck className="w-3.5 h-3.5" />}>
           <DataState
             loading={models.loading}
@@ -148,7 +148,7 @@ export default function ModelGovernance() {
           />
         </Panel>
 
-        <Panel className="xl:col-span-2" title="GOVERNANCE CHECKLIST" icon={<ShieldCheck className="w-3.5 h-3.5" />} bodyClassName="p-0">
+        <Panel className="lg:col-span-2" title="GOVERNANCE CHECKLIST" icon={<ShieldCheck className="w-3.5 h-3.5" />} bodyClassName="p-0">
           <table className="w-full text-[11px] font-mono">
             <thead>
               <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">

@@ -102,7 +102,7 @@ export default function AdminData() {
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Panel title="TABLE INVENTORY" icon={<Table2 className="w-3.5 h-3.5" />} bodyClassName="p-0">
           <DataState
             loading={anyLoading}

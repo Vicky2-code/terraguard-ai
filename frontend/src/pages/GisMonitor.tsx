@@ -38,8 +38,8 @@ export default function GisMonitor() {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-        <div className="xl:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="lg:col-span-2 xl:col-span-3">
           <DataState
             loading={map.loading}
             error={map.error}
@@ -51,7 +51,7 @@ export default function GisMonitor() {
           >
             <RiskMap
               features={features}
-              height="h-[560px]"
+              height="h-[340px] sm:h-[460px] xl:h-[560px]"
               selectedId={selected?.id ?? null}
               onSelect={setSelected}
               onRefresh={map.refetch}

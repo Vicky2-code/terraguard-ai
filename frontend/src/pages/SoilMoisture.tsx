@@ -77,7 +77,7 @@ export default function SoilMoisture() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Panel title="MOISTURE BY SOIL LAYER" icon={<Droplets className="w-3.5 h-3.5" />}>
           <DataState
             loading={soil.loading}
@@ -127,7 +127,7 @@ export default function SoilMoisture() {
           <SourceStrip meta={s?.meta ?? null} extra={isDemo ? <span className="text-purple-400 font-bold">DEMO DATA</span> : undefined} />
         </Panel>
 
-        <Panel className="xl:col-span-2" title="MOISTURE TREND" icon={<Droplets className="w-3.5 h-3.5" />}>
+        <Panel className="lg:col-span-2" title="MOISTURE TREND" icon={<Droplets className="w-3.5 h-3.5" />}>
           <DataState
             loading={soil.loading}
             error={soil.error}

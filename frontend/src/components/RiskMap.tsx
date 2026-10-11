@@ -31,7 +31,7 @@ function markerRadius(score: number): number {
  */
 export function RiskMap({
   features,
-  height = "h-[460px]",
+  height = "h-[320px] sm:h-[400px] lg:h-[460px]",
   selectedId,
   onSelect,
   onRefresh,
@@ -108,7 +108,7 @@ export function RiskMap({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="FILTER LOCATION / STATE…"
-          className="w-44 bg-panel2 border border-line rounded px-2 py-1 text-[10px] font-mono text-slate-200 placeholder:text-slate-600 focus:border-sky-600 focus:outline-none"
+          className="w-full sm:w-44 bg-panel2 border border-line rounded px-2 py-1 text-[10px] font-mono text-slate-200 placeholder:text-slate-600 focus:border-sky-600 focus:outline-none"
         />
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-[9px] font-mono text-slate-500 tabular-nums">

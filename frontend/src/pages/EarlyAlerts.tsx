@@ -98,10 +98,10 @@ export default function EarlyAlerts() {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {/* alert list */}
         <Panel
-          className="xl:col-span-3"
+          className="lg:col-span-2 xl:col-span-3"
           title="ALERT STREAM"
           icon={<BellRing className="w-3.5 h-3.5" />}
           bodyClassName="p-0"

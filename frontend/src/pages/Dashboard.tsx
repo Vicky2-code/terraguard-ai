@@ -226,9 +226,9 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* map */}
-        <div className="xl:col-span-2">
+        <div className="lg:col-span-2">
           <Panel
             title="GIS RISK MAP — NORTHEAST INDIA"
             icon={<MapPin className="w-3.5 h-3.5" />}
@@ -253,7 +253,7 @@ export default function Dashboard() {
             >
               <RiskMap
                 features={map.data?.features ?? []}
-                height="h-[430px]"
+                height="h-[320px] sm:h-[400px] xl:h-[430px]"
                 onRefresh={map.refetch}
                 refreshing={map.refreshing}
               />

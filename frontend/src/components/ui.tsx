@@ -329,16 +329,16 @@ export function Field({
 }
 
 export const inputCls =
-  "w-full bg-panel2 border border-line rounded px-2.5 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:border-sky-600 focus:outline-none transition-colors";
+  "w-full bg-panel2 border border-line rounded px-2.5 py-2 sm:py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:border-sky-600 focus:outline-none transition-colors";
 
 export const btnPrimary =
-  "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-sky-600/90 hover:bg-sky-500 text-white border-sky-400 disabled:opacity-50 disabled:cursor-not-allowed";
+  "flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-sky-600/90 hover:bg-sky-500 text-white border-sky-400 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export const btnGhost =
-  "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed";
+  "flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed";
 
 export const btnDanger =
-  "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-red-600/90 hover:bg-red-500 text-white border-red-400 shadow-md shadow-red-950 disabled:opacity-50 disabled:cursor-not-allowed";
+  "flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-red-600/90 hover:bg-red-500 text-white border-red-400 shadow-md shadow-red-950 disabled:opacity-50 disabled:cursor-not-allowed";
 
 /** Page heading used on every routed page. */
 export function PageHeader({
