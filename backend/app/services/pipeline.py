@@ -36,7 +36,7 @@ HEALTH = {
 }
 
 JOB_LABELS = {
-    "weather_ingestion": "Weather ingestion (Open-Meteo)",
+    "weather_ingestion": "Weather ingestion (Open-Meteo -> MET Norway fallback)",
     "risk_prediction": "Risk prediction (prototype engine)",
     "alert_evaluation": "Alert evaluation (thresholds)",
     "health_check": "Health check",
@@ -219,11 +219,16 @@ def run_health_checks() -> dict:
     # weather provider
     wstate = weather_service.STATE
     if wstate.get("ok") is True:
-        w_status, w_detail = "ONLINE", f"Open-Meteo live (last success {iso(wstate.get('last_success'))})"
+        w_status = "ONLINE"
+        w_detail = (
+            f"{weather_service.source_label()} live "
+            f"(last success {iso(wstate.get('last_success'))})"
+        )
     elif wstate.get("ok") is False:
         w_status = "DEGRADED"
         w_detail = (
-            f"Open-Meteo unavailable - simulated_fallback values in use: {wstate.get('error')}"
+            "no live weather provider reachable - simulated_fallback values in use: "
+            f"{wstate.get('error')}"
         )
     else:
         w_status, w_detail = "DEGRADED", "first ingestion not attempted yet"

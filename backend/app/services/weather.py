@@ -1,27 +1,30 @@
 """Weather + soil ingestion.
 
-Live data comes from Open-Meteo (free, no API key) and is fetched SERVER-SIDE
-only:
+Live data is fetched SERVER-SIDE only, from keyless providers, using a
+provider chain (Open-Meteo's free tier is limited PER IP, so shared cloud
+egress ranges — e.g. Render's free tier — are frequently over quota):
 
-- forecast API  : https://api.open-meteo.com/v1/forecast   (current weather,
-                   hourly precipitation for 1h/6h/24h sums and 24h forecast)
-- archive API   : https://archive-api.open-meteo.com/v1/archive (ERA5-Land
-                   modelled soil moisture reanalysis)
+1. Open-Meteo forecast API   : https://api.open-meteo.com/v1/forecast
+                               (direct, or via OPENMETEO_PROXY_BASE_URL)
+2. Open-Meteo historical-forecast API : same payload shape, separate quota
+3. MET Norway locationforecast: https://api.met.no/weatherapi/locationforecast/2.0/compact
+                               (keyless, no shared-IP quota; publishes
+                               forecasts only, so its rainfall fields are
+                               short-range forecast sums and are labeled as such)
 
-Target region: NE India bounding box lat 21.5-29.6, lon 88.0-97.5 (every
-monitored location inside that box is ingested in one batched request).
+Soil moisture (ERA5-Land modelled reanalysis) still comes from the Open-Meteo
+archive API.
 
-When the network call fails (or TERRAGUARD_LIVE_WEATHER=0) we keep the
+When every provider fails (or TERRAGUARD_LIVE_WEATHER=0) we keep the
 deterministic seeded values already in the database and flag them honestly:
 
     source_status: "DEMO"      -> values are simulated/seeded (never live)
     source_status: "STALE"     -> last known live values, refresh failing
-    source_status: "LIVE"      -> fresh from Open-Meteo
+    source_status: "LIVE"      -> fresh from the provider named in meta.source
 
-`meta.source` is "Open-Meteo" while live and "simulated_fallback" otherwise;
 `meta.data_source` is always the lowercase machine value
-("open-meteo" / "simulated_fallback"; soil: "open-meteo-reanalysis" /
-"simulated").
+("open-meteo" / "open-meteo-historical" / "met.no" / "simulated_fallback";
+soil: "open-meteo-reanalysis" / "simulated").
 """
 
 import math
@@ -36,7 +39,22 @@ from app.models.entities import EnvironmentalData, Location, SoilSnapshot
 from app.services.common import age_seconds, build_meta, get_setting, iso, utcnow
 
 FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+HISTORICAL_FORECAST_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast"
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
+MET_NO_URL = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
+
+# Every provider that can write LIVE weather: machine key -> display label.
+PROVIDER_LABEL = {
+    "open-meteo": "Open-Meteo",
+    "open-meteo-historical": "Open-Meteo (historical-forecast)",
+    "met.no": "MET Norway (api.met.no)",
+}
+LIVE_SOURCES = tuple(PROVIDER_LABEL)
+
+
+def source_label() -> str:
+    """Display name of the provider behind the current live values."""
+    return PROVIDER_LABEL.get(STATE.get("source") or "", "Open-Meteo")
 
 
 def _forecast_url() -> str:
@@ -73,7 +91,7 @@ def _chunked(items, size):
         yield items[i : i + size]
 
 
-def _get_json(url: str, params: dict):
+def _get_json(url: str, params: dict, headers: dict | None = None, retries: int = 4):
     """GET JSON with retry + backoff for transient upstream failures.
 
     Open-Meteo rate-limits per IP. Shared datacenter ranges (cloud hosts)
@@ -83,12 +101,17 @@ def _get_json(url: str, params: dict):
     """
     delay = 2.0
     last_error: Exception | None = None
-    for attempt in range(4):
+    for attempt in range(retries):
         if attempt:
             time.sleep(delay)
             delay *= 2
         try:
-            response = httpx.get(url, params=params, timeout=config.WEATHER_TIMEOUT_SECONDS)
+            response = httpx.get(
+                url,
+                params=params,
+                headers=headers,
+                timeout=config.WEATHER_TIMEOUT_SECONDS,
+            )
             response.raise_for_status()
             return response.json()
         except httpx.HTTPStatusError as exc:
@@ -134,15 +157,26 @@ def _window_sum(values, start, end):
     return round(total, 2) if seen else 0.0
 
 
-def fetch_open_meteo(db) -> bool:
+def _forecast_candidates() -> list:
+    """Ordered (provider_key, url) pairs for the Open-Meteo family.
+
+    The first entry honours OPENMETEO_PROXY_BASE_URL; the historical-forecast
+    host uses a separate upstream quota, so it is the preferred fallback when
+    the primary forecast API returns 429 from a shared egress IP.
+    """
+    candidates = [("open-meteo", _forecast_url())]
+    if config.WEATHER_FALLBACK_ENABLED:
+        candidates.append(("open-meteo-historical", HISTORICAL_FORECAST_URL))
+    return candidates
+
+
+def _ingest_open_meteo(db, url: str, provider: str) -> None:
     """Batch-fetch current weather + precipitation history for every location."""
     locations = db.query(Location).order_by(Location.id).all()
     if not locations:
-        return False
+        return
 
     now = utcnow()
-    STATE["last_attempt"] = now
-
     batches = list(_chunked(locations, 40))
     for batch_idx, batch in enumerate(batches):
         params = {
@@ -154,7 +188,7 @@ def fetch_open_meteo(db) -> bool:
             "forecast_days": 2,
             "timezone": "GMT",
         }
-        payload = _get_json(_forecast_url(), params)
+        payload = _get_json(url, params)
         rows = payload if isinstance(payload, list) else [payload]
 
         for loc, row in zip(batch, rows):
@@ -174,7 +208,7 @@ def fetch_open_meteo(db) -> bool:
                 loc.rainfall_mm_6h = _window_sum(values, idx - 5, idx + 1)
                 loc.rainfall_mm_24h = _window_sum(values, idx - 23, idx + 1)
                 loc.forecast_24h_mm = _window_sum(values, idx + 1, idx + 25)
-            loc.weather_source = "open-meteo"
+            loc.weather_source = provider
             loc.weather_updated_at = now
 
             db.add(
@@ -196,11 +230,161 @@ def fetch_open_meteo(db) -> bool:
         if batch_idx < len(batches) - 1:
             time.sleep(1.0)
 
+
+def _met_precipitation_series(timeseries: list) -> list:
+    """Hourly precipitation amounts (mm) from a MET Norway timeseries.
+
+    MET only publishes forecasts. Prefer the 1-hour block; when it is absent
+    fall back to splitting the 6h / 12h block across its hours.
+    """
+    values = []
+    for entry in timeseries:
+        data = entry.get("data") or {}
+        amount = ((data.get("next_1_hours") or {}).get("details") or {}).get(
+            "precipitation_amount"
+        )
+        if amount is None:
+            amount = ((data.get("next_6_hours") or {}).get("details") or {}).get(
+                "precipitation_amount"
+            )
+            if amount is not None:
+                amount = float(amount) / 6.0
+        if amount is None:
+            amount = ((data.get("next_12_hours") or {}).get("details") or {}).get(
+                "precipitation_amount"
+            )
+            if amount is not None:
+                amount = float(amount) / 12.0
+        values.append(float(amount) if amount is not None else 0.0)
+    return values
+
+
+def met_no_metrics(timeseries: list) -> dict:
+    """Map a MET Norway timeseries to TerraGuard weather fields (pure).
+
+    Precipitation: 1h = current hour, 6h/24h = the NEXT 6/24 hours, because
+    MET publishes no observed history. Callers must disclose this in the meta.
+    """
+    if not timeseries:
+        raise ValueError("empty MET Norway timeseries")
+    first = timeseries[0]
+    details = ((first.get("data") or {}).get("instant") or {}).get("details") or {}
+    precip = _met_precipitation_series(timeseries)
+    return {
+        "observed_at": first.get("time"),
+        "temperature_c": round(float(details.get("air_temperature") or 0), 1),
+        "humidity_pct": round(float(details.get("relative_humidity") or 0), 1),
+        # MET reports wind speed in m/s; TerraGuard stores/display km/h.
+        "wind_kmh": round(float(details.get("wind_speed") or 0) * 3.6, 1),
+        "pressure_hpa": round(float(details.get("air_pressure_at_sea_level") or 1013), 1),
+        "rainfall_mm_1h": round(precip[0], 2),
+        "rainfall_mm_6h": round(sum(precip[:6]), 2),
+        "rainfall_mm_24h": round(sum(precip[:24]), 2),
+        "forecast_24h_mm": round(sum(precip[1:25]), 2),
+    }
+
+
+def _ingest_met_no(db) -> bool:
+    """Per-location MET Norway ingest (keyless; paced to respect their ToS)."""
+    locations = db.query(Location).order_by(Location.id).all()
+    if not locations:
+        return False
+
+    now = utcnow()
+    headers = {"User-Agent": config.MET_NO_USER_AGENT, "Accept": "application/json"}
+    failures = 0
+    last_error: Exception | None = None
+
+    for index, loc in enumerate(locations):
+        try:
+            payload = _get_json(
+                MET_NO_URL,
+                {"lat": f"{loc.latitude:.4f}", "lon": f"{loc.longitude:.4f}"},
+                headers=headers,
+                retries=2,
+            )
+            timeseries = ((payload.get("properties") or {}).get("timeseries")) or []
+            metrics = met_no_metrics(timeseries)
+
+            loc.temperature_c = metrics["temperature_c"]
+            loc.humidity_pct = metrics["humidity_pct"]
+            loc.wind_kmh = metrics["wind_kmh"]
+            loc.pressure_hpa = metrics["pressure_hpa"]
+            loc.rainfall_mm_1h = metrics["rainfall_mm_1h"]
+            loc.rainfall_mm_6h = metrics["rainfall_mm_6h"]
+            loc.rainfall_mm_24h = metrics["rainfall_mm_24h"]
+            loc.forecast_24h_mm = metrics["forecast_24h_mm"]
+            loc.weather_source = "met.no"
+            loc.weather_updated_at = now
+
+            db.add(
+                EnvironmentalData(
+                    location_id=loc.id,
+                    rainfall=loc.rainfall_mm_24h,
+                    soil_moisture=loc.soil_moisture,
+                    temperature=loc.temperature_c,
+                    humidity=loc.humidity_pct,
+                    slope=loc.slope,
+                    recorded_at=now,
+                )
+            )
+        except Exception as exc:  # one bad location must not sink the cycle
+            failures += 1
+            last_error = exc
+
+        if index % 10 == 9:
+            db.commit()
+        time.sleep(config.MET_NO_INGEST_DELAY_SECONDS)
+
+    db.commit()
+
+    if failures == len(locations):
+        raise RuntimeError(f"MET Norway failed for every location: {last_error}")
+
     STATE["ok"] = True
     STATE["last_success"] = now
-    STATE["error"] = None
-    STATE["source"] = "open-meteo"
+    STATE["source"] = "met.no"
+    STATE["error"] = (
+        None
+        if failures == 0
+        else f"MET Norway partial ingest: {failures}/{len(locations)} locations failed"
+    )
     return True
+
+
+def fetch_open_meteo(db) -> bool:
+    """Run the provider chain and return True as soon as one provider works.
+
+    Raises a combined error only when every provider failed, so callers keep
+    the existing "fallback values + honest flag" behaviour.
+    """
+    locations = db.query(Location).order_by(Location.id).all()
+    if not locations:
+        return False
+
+    STATE["last_attempt"] = utcnow()
+    errors: list = []
+
+    for provider, url in _forecast_candidates():
+        try:
+            _ingest_open_meteo(db, url, provider)
+            STATE["ok"] = True
+            STATE["last_success"] = utcnow()
+            STATE["error"] = None
+            STATE["source"] = provider
+            return True
+        except Exception as exc:  # rate limit / network / payload
+            db.rollback()
+            errors.append(f"{provider}: {exc}")
+
+    if config.WEATHER_FALLBACK_ENABLED:
+        try:
+            return _ingest_met_no(db)
+        except Exception as exc:
+            db.rollback()
+            errors.append(f"met.no: {exc}")
+
+    raise RuntimeError(" | ".join(errors) or "no weather provider configured")
 
 
 def _soil_layers_from_values(v0, v1, v2, v3, v4):
@@ -284,7 +468,8 @@ def fetch_soil(db) -> bool:
                 values = [s[last] for s in series]
                 layers = _pack_layers(_soil_layers_from_values(*values))
                 loc.soil_moisture = layers[0]["moisture"]
-                loc.weather_source = "open-meteo"
+                # Provenance for soil lives on the snapshot, not on the
+                # location row (which tracks the WEATHER provider chain label).
                 _store_soil_snapshot(db, loc, layers, "open-meteo-reanalysis", "open-meteo-reanalysis", now)
 
             # persist per chunk + pace requests (see fetch_open_meteo)
@@ -353,7 +538,10 @@ def ingest(db) -> dict:
             db.rollback()
             STATE["ok"] = False
             STATE["error"] = str(exc)
-            STATE["source"] = "simulated_fallback"
+            # Keep the last successful provider name so STALE data is still
+            # attributed to the right upstream.
+            if STATE["last_success"] is None:
+                STATE["source"] = "simulated_fallback"
         try:
             soil_ok = fetch_soil(db)
         except Exception as exc:  # pragma: no cover - defensive
@@ -369,7 +557,9 @@ def ingest(db) -> dict:
 
     if STATE["ok"] is not True:
         # Flag stored values honestly: they are the deterministic fallback.
-        for loc in db.query(Location).filter(Location.weather_source != "open-meteo").all():
+        for loc in (
+            db.query(Location).filter(Location.weather_source.notin_(LIVE_SOURCES)).all()
+        ):
             loc.weather_source = "simulated_fallback"
         db.commit()
 
@@ -401,23 +591,41 @@ def weather_source_status() -> str:
     return "DEMO"
 
 
+def _live_detail(provider: str) -> str:
+    """Honest one-line description of where live values came from."""
+    if provider == "met.no":
+        return (
+            "live MET Norway (api.met.no) ingest ok - this provider publishes forecasts "
+            "only, so rainfall 1h/6h/24h are short-range forecast sums"
+        )
+    if provider == "open-meteo-historical":
+        return (
+            "live Open-Meteo historical-forecast ingest ok "
+            "(primary Open-Meteo forecast API is over its daily IP quota)"
+        )
+    return "live Open-Meteo ingest ok"
+
+
 def weather_meta(refresh: int = config.WEATHER_REFRESH_SECONDS) -> dict:
     status = weather_source_status()
-    if status == "LIVE":
-        source = "Open-Meteo"
+    provider = STATE.get("source") or "open-meteo"
+    if status in ("LIVE", "STALE"):
+        source = PROVIDER_LABEL.get(provider, "Open-Meteo")
         updated = STATE["last_success"]
-        data_source = "open-meteo"
-    elif status == "STALE":
-        source = "Open-Meteo"
-        updated = STATE["last_success"]
-        data_source = "simulated_fallback"
+        data_source = provider if provider in LIVE_SOURCES else "simulated_fallback"
     else:
         source = "simulated_fallback"
         updated = STATE["last_attempt"]
         data_source = "simulated_fallback"
     meta = build_meta(source, status, updated, refresh)
     meta["data_source"] = data_source
-    meta["detail"] = STATE["error"] if status != "LIVE" else "live Open-Meteo ingest ok"
+    if status == "LIVE":
+        meta["detail"] = STATE["error"] or _live_detail(provider)
+    else:
+        meta["detail"] = (
+            STATE["error"]
+            or "no live weather provider reachable - deterministic fallback values in use"
+        )
     return meta
 
 

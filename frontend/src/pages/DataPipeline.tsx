@@ -20,7 +20,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 const JOBS = [
-  { name: "weather_ingestion", desc: "Pulls Open-Meteo observations into weather tables" },
+  { name: "weather_ingestion", desc: "Pulls live weather (Open-Meteo, MET Norway fallback) into weather tables" },
   { name: "risk_prediction", desc: "Re-scores every location with the prototype engine" },
   { name: "alert_evaluation", desc: "Applies thresholds, dedupes and stores alerts" },
   { name: "health_check", desc: "Probes API, DB, weather provider, ML engine, worker" },

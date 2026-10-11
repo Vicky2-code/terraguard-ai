@@ -48,7 +48,7 @@ def system_status():
         "last_sync": iso(wstate.get("last_success")),
         "uptime_seconds": int((now - PROCESS_STARTED_AT).total_seconds()),
         "backend_version": config.BACKEND_VERSION,
-        "weather_source": "Open-Meteo" if live else "simulated_fallback",
+        "weather_source": weather_service.source_label() if live else "simulated_fallback",
         "demo_mode": not live,
         "connection": {
             "stream_url": "/api/stream",

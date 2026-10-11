@@ -43,6 +43,7 @@ from app.services.common import (
     validate_cutoffs,
 )
 from app.services.pipeline import JOB_LABELS, PROCESS_STARTED_AT, job_schedules, scheduler
+from app.services import weather as weather_service
 
 router = APIRouter(prefix="/api", tags=["Governance"])
 
@@ -228,22 +229,41 @@ def open_meteo_probe(
       minimal - 1 location, current temperature only (is the endpoint/IP OK?)
       batch   - first 40 locations with the production request shape
     transport:
-      direct  - https://api.open-meteo.com
-      proxy   - OPENMETEO_PROXY_BASE_URL (e.g. the Vercel rewrite), if configured
+      direct     - https://api.open-meteo.com  (primary forecast API)
+      proxy      - OPENMETEO_PROXY_BASE_URL (e.g. the Vercel rewrite), if configured
+      historical - Open-Meteo historical-forecast host (separate quota, used
+                   as the first fallback in the provider chain)
+      met-no     - MET Norway locationforecast (last-resort keyless fallback;
+                   always a single location, ignores mode)
 
     Returns the upstream status code AND a body excerpt so rate-limit
     messages ("daily limit exceeded" etc.) are visible, not just "429".
     """
+    headers: dict = {}
     if transport == "direct":
         base = "https://api.open-meteo.com/v1/forecast"
+    elif transport == "historical":
+        base = weather_service.HISTORICAL_FORECAST_URL
     elif transport == "proxy":
         if not config.OPENMETEO_PROXY_BASE_URL:
             raise HTTPException(status_code=400, detail="OPENMETEO_PROXY_BASE_URL is not configured")
         base = f"{config.OPENMETEO_PROXY_BASE_URL}/v1/forecast"
+    elif transport == "met-no":
+        base = weather_service.MET_NO_URL
     else:
-        raise HTTPException(status_code=400, detail="transport must be direct or proxy")
+        raise HTTPException(
+            status_code=400,
+            detail="transport must be direct, proxy, historical or met-no",
+        )
 
-    if mode == "minimal":
+    if transport == "met-no":
+        # MET Norway is per-location and requires a descriptive User-Agent.
+        loc = db.query(Location).order_by(Location.id).first()
+        if loc is None:
+            raise HTTPException(status_code=400, detail="no locations seeded yet")
+        params = {"lat": f"{loc.latitude:.4f}", "lon": f"{loc.longitude:.4f}"}
+        headers = {"User-Agent": config.MET_NO_USER_AGENT, "Accept": "application/json"}
+    elif mode == "minimal":
         loc = db.query(Location).order_by(Location.id).first()
         if loc is None:
             raise HTTPException(status_code=400, detail="no locations seeded yet")
@@ -271,7 +291,9 @@ def open_meteo_probe(
 
     started = time.perf_counter()
     try:
-        response = httpx.get(base, params=params, timeout=config.WEATHER_TIMEOUT_SECONDS)
+        response = httpx.get(
+            base, params=params, headers=headers, timeout=config.WEATHER_TIMEOUT_SECONDS
+        )
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         return {
             "transport": transport,

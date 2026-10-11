@@ -151,13 +151,13 @@ export default function WeatherRadar() {
             </div>
             <div className="text-[10px] text-slate-600 leading-relaxed">
               No radar tile provider is configured for this deployment. Rainfall values on this page
-              come from the Open-Meteo station/model ingest instead.
+              come from the server-side weather provider chain instead.
             </div>
           </div>
           <SourceStrip
             meta={
               weather.data?.meta ?? {
-                source: "Open-Meteo (server ingest)",
+                source: "live weather provider (server ingest)",
                 source_status: "UNAVAILABLE",
                 last_updated: null,
                 data_age_seconds: 0,

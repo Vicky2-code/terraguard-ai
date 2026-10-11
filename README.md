@@ -97,6 +97,8 @@ No API secrets ever ship in the browser bundle — weather ingestion happens ser
 | `TERRAGUARD_LIVE_WEATHER` | `1`                | `0` forces deterministic fallback (tests). |
 | `WEATHER_TIMEOUT_SECONDS` | `12`               | Open-Meteo request timeout.                |
 | `OPENMETEO_PROXY_BASE_URL` | *(empty)*         | Optional egress proxy for forecasts; **include the path prefix** (e.g. `https://app.vercel.app/api/open-meteo`). |
+| `WEATHER_FALLBACK_ENABLED` | `1`        | Enables the keyless fallback chain (Open-Meteo historical-forecast → MET Norway) when the primary API is rate-limited. |
+| `MET_NO_USER_AGENT` | `TerraGuard-AI/1.0 (+repo)` | Identifying User-Agent required by MET Norway's ToS. |
 
 See `backend/.env.example`.
 
@@ -106,7 +108,7 @@ See `backend/.env.example`.
 
 | Feature                            | Source                                                        |
 | ---------------------------------- | ------------------------------------------------------------- |
-| Weather observations & history     | **Live** Open-Meteo, ingested server-side every 15 min        |
+| Weather observations & history     | **Live** server-side provider chain — Open-Meteo → Open-Meteo historical-forecast → MET Norway (keyless, no shared-IP quota), refreshed every 15 min |
 | Locations, corridors, infrastructure | Seeded reference dataset (labeled `DEMO` in status strips)  |
 | Incidents / alerts / thresholds    | **Real** — persisted in the database, full CRUD via API       |
 | Risk scores                        | **PROTOTYPE heuristic** — explainable, never claimed accurate |

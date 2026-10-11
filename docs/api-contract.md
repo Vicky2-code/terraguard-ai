@@ -60,7 +60,10 @@ All endpoints below are prefixed with `/api` unless stated otherwise. All respon
 ## Weather & soil
 
 - `GET /api/weather?location_id=` → `{location_id, temperature_c, humidity_pct, wind_kmh, pressure_hpa,
-  rainfall_mm_1h, rainfall_mm_6h, rainfall_mm_24h, forecast_24h_mm, observed_at, meta}` (live Open-Meteo).
+  rainfall_mm_1h, rainfall_mm_6h, rainfall_mm_24h, forecast_24h_mm, observed_at, meta}`. `meta.source`
+  names the provider actually used (Open-Meteo, Open-Meteo historical-forecast, or MET Norway) and
+  `meta.detail` discloses provider limitations — e.g. MET Norway publishes forecasts only, so its
+  rainfall 1h/6h/24h values are short-range forecast sums.
 - `GET /api/weather/history?location_id=&hours=24` → `{series: [{time, rainfall_mm, temperature_c}], meta}`
 - `GET /api/soil-moisture?location_id=` → `{layers: [{label:"0–7 cm", moisture, saturation_pct, status}],
   trend: [{time, moisture}], observed_at, meta}` — Open-Meteo modelled reanalysis; when unavailable
@@ -114,10 +117,12 @@ All endpoints below are prefixed with `/api` unless stated otherwise. All respon
   Unmeasured metrics must be `null` (UI renders NOT AVAILABLE).
 - `GET /api/pipeline` → `{components: [{name, status: ONLINE|DEGRADED|OFFLINE, detail, last_checked}],
   runs: [{job_name, status, started_at, finished_at, message}], meta}`
-- `GET /api/pipeline/open-meteo-probe?mode=minimal|batch&transport=direct|proxy` (ADMIN)
+- `GET /api/pipeline/open-meteo-probe?mode=minimal|batch&transport=direct|proxy|historical|met-no` (ADMIN)
   → `{transport, mode, endpoint_host, status_code, ok, elapsed_ms, body_excerpt, checked_at}`.
-  Server-side diagnostics: can THIS backend host reach the Open-Meteo forecast API right now
-  (returns the upstream status + body excerpt so rate-limit messages are visible).
+  Server-side diagnostics: can THIS backend host reach each provider in the weather chain right now
+  (returns the upstream status + body excerpt so rate-limit messages are visible). `direct` =
+  api.open-meteo.com, `proxy` = OPENMETEO_PROXY_BASE_URL, `historical` = the Open-Meteo
+  historical-forecast host, `met-no` = MET Norway (single location, ignores `mode`).
 - `GET /api/settings` → `{thresholds: {critical, very_high, high, moderate}, region, language,
   refresh_interval_seconds, notifications: {...}, updated_at}`
 - `PATCH /api/settings` (ADMIN) → updated settings (persisted in `system_settings` table).

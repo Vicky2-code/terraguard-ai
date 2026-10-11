@@ -111,6 +111,31 @@ WEATHER_TIMEOUT_SECONDS = float(os.getenv("WEATHER_TIMEOUT_SECONDS", "12"))
 # so forecast calls leave from a different egress IP. Empty = direct calls.
 OPENMETEO_PROXY_BASE_URL = os.getenv("OPENMETEO_PROXY_BASE_URL", "").rstrip("/")
 
+# Provider chain fallback. Open-Meteo's free tier is limited PER IP, so shared
+# cloud egress ranges are frequently over quota even when this app is idle.
+# With the fallback enabled, ingestion tries, in order:
+#   1. Open-Meteo forecast API (direct or via OPENMETEO_PROXY_BASE_URL)
+#   2. Open-Meteo historical-forecast API (a separate endpoint quota)
+#   3. MET Norway locationforecast (keyless, no shared-IP quota)
+# Every provider is labeled honestly in the UI meta; nothing is fabricated.
+WEATHER_FALLBACK_ENABLED = os.getenv("WEATHER_FALLBACK_ENABLED", "1").strip().lower() not in (
+    "0",
+    "false",
+    "no",
+)
+
+# MET Norway requires a descriptive User-Agent identifying the application
+# (see https://api.met.no/doc/TermsOfService). Keep it in the env so operators
+# can add their own contact details.
+MET_NO_USER_AGENT = os.getenv(
+    "MET_NO_USER_AGENT",
+    "TerraGuard-AI/1.0 (+https://github.com/Vicky2-code/terraguard-ai)",
+)
+
+# MET Norway is queried per location; pace requests (their ToS asks for
+# well under 20 req/s and no unnecessary bursts).
+MET_NO_INGEST_DELAY_SECONDS = float(os.getenv("MET_NO_INGEST_DELAY_SECONDS", "0.4"))
+
 # ---------------------------------------------------------------------------
 # Pipeline cadence (seconds)
 # ---------------------------------------------------------------------------
