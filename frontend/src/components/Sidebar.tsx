@@ -27,6 +27,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { SectionLabel } from "./ui";
 import { useIsDesktop } from "../hooks/useMediaQuery";
+import { useT } from "../lib/i18n";
 
 export interface NavItem {
   to: string;
@@ -115,6 +116,7 @@ export function Sidebar({
   // the collapsed rail is a desktop-only affordance.
   const isDesktop = useIsDesktop();
   const showFull = !collapsed || !isDesktop;
+  const t = useT();
 
   return (
     <>
@@ -139,13 +141,15 @@ export function Sidebar({
         aria-label="Primary navigation"
       >
         <div className="lg:hidden flex items-center justify-between px-3 py-2 border-b border-line2">
-          <span className="text-[10px] font-mono tracking-[0.2em] text-slate-400">NAVIGATION</span>
+          <span className="text-[10px] font-mono tracking-[0.2em] text-slate-400">
+            {t("NAVIGATION")}
+          </span>
           <button
             onClick={onCloseMobile}
             className="px-2 py-1 rounded text-[10px] font-mono text-slate-400 hover:text-white hover:bg-slate-800/60"
-            aria-label="Close navigation"
+            aria-label={t("Close navigation")}
           >
-            ✕ CLOSE
+            ✕ {t("CLOSE")}
           </button>
         </div>
 
@@ -169,7 +173,7 @@ export function Sidebar({
                       key={item.to}
                       to={item.to}
                       onClick={onCloseMobile}
-                      title={showFull ? undefined : item.label}
+                      title={showFull ? undefined : t(item.label)}
                       className={({ isActive }) =>
                         `group flex items-center gap-2.5 rounded px-3 py-1.5 text-[12px] font-mono transition-all border-l-2 ${
                           showFull ? "" : "justify-center px-1.5"
@@ -181,7 +185,7 @@ export function Sidebar({
                       }
                     >
                       <Icon className="w-4 h-4 shrink-0" />
-                      {showFull && <span className="truncate">{item.label}</span>}
+                      {showFull && <span className="truncate">{t(item.label)}</span>}
                       {showFull && badge > 0 && (
                         <span className="ml-auto px-1.5 py-[1px] rounded bg-red-600/80 text-white text-[9px] font-bold tabular-nums blink">
                           {badge > 99 ? "99+" : badge}
@@ -198,16 +202,16 @@ export function Sidebar({
         {showFull && (
           <div className="mt-auto p-3 border-t border-line2 bg-ink text-[11px] text-slate-400 font-mono space-y-1.5">
             <div className="flex items-center justify-between">
-              <span>ENGINE</span>
-              <span className="text-emerald-400">PROTOTYPE</span>
+              <span>{t("ENGINE")}</span>
+              <span className="text-emerald-400">{t("PROTOTYPE")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>RISK BANDS</span>
-              <span className="text-slate-300">5-LEVEL</span>
+              <span>{t("RISK BANDS")}</span>
+              <span className="text-slate-300">{t("5-LEVEL")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>REGION</span>
-              <span className="text-slate-300">NER, INDIA</span>
+              <span>{t("REGION")}</span>
+              <span className="text-slate-300">{t("NER, INDIA")}</span>
             </div>
           </div>
         )}

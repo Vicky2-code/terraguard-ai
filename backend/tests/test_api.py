@@ -43,6 +43,46 @@ class TestAuth:
     def test_me_requires_token(self, client):
         assert client.get("/api/auth/me").status_code == 401
 
+    def test_register_creates_viewer_and_can_login(self, client):
+        resp = client.post(
+            "/api/auth/register",
+            json={"name": "Test User", "email": "tester@example.com", "password": "secret123"},
+        )
+        assert resp.status_code == 201, resp.text
+        body = resp.json()
+        assert body["token_type"] == "bearer"
+        assert body["token"]
+        assert body["user"]["role"] == "VIEWER"
+        assert body["user"]["email"] == "tester@example.com"
+        # normalised email can now log in
+        login = client.post(
+            "/api/auth/login",
+            json={"email": "Tester@example.com", "password": "secret123"},
+        )
+        assert login.status_code == 200
+        assert login.json()["user"]["role"] == "VIEWER"
+
+    def test_register_duplicate_email_is_409(self, client):
+        resp = client.post(
+            "/api/auth/register",
+            json={"name": "Dup", "email": "admin@terraguard.local", "password": "secret123"},
+        )
+        assert resp.status_code == 409
+
+    def test_register_invalid_email_is_422(self, client):
+        resp = client.post(
+            "/api/auth/register",
+            json={"name": "Bad", "email": "not-an-email", "password": "secret123"},
+        )
+        assert resp.status_code == 422
+
+    def test_register_short_password_is_422(self, client):
+        resp = client.post(
+            "/api/auth/register",
+            json={"name": "Short", "email": "short@example.com", "password": "abc"},
+        )
+        assert resp.status_code == 422
+
     def test_settings_mutation_requires_admin(self, client):
         resp = client.patch("/api/settings", json={"language": "en"})
         assert resp.status_code in (401, 403)

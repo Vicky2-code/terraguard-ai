@@ -17,7 +17,8 @@ All endpoints below are prefixed with `/api` unless stated otherwise. All respon
 
 ## Auth
 
-- `POST /api/auth/login` body `{email, password}` → `{token, token_type: "bearer", user: {id, name, email, role}}`
+- `POST /api/auth/login` body `{email, password}` → `{token, token_type: "bearer", user: {id, name, email, role}}` (email is case-insensitive; plain usernames like `admin` also work)
+- `POST /api/auth/register` body `{name, email, password}` → `201` with the same shape as login. New accounts are created as `VIEWER` (no privileged role can be self-service). Errors: `409` duplicate email, `422` invalid email / short password.
 - `GET /api/auth/me` (Bearer) → user object
 - Roles: `VIEWER < FIELD_OFFICER < ANALYST < ADMIN`. Protected: `PATCH /api/settings`, `POST /api/admin/*`,
   `GET /api/models` mutations. Login required for those; public read endpoints stay open.

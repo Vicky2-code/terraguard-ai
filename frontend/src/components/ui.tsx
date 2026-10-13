@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import type { Meta } from "../lib/types";
 import { ageLabel, formatDateTime } from "../hooks/useClock";
+import { useT } from "../lib/i18n";
 
 /* ------------------------------------------------------------------ */
 /* Panel                                                                */
@@ -128,26 +129,30 @@ export function KpiCard({
 /* ------------------------------------------------------------------ */
 
 export function LoadingBlock({ label = "LOADING DATA…" }: { label?: string }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8 text-slate-400 font-mono text-xs">
       <div className="w-7 h-7 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
-      <span className="tracking-widest">{label}</span>
+      <span className="tracking-widest">{t(label)}</span>
     </div>
   );
 }
 
 export function ErrorBlock({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
       <AlertTriangle className="w-6 h-6 text-red-400" />
-      <div className="text-[11px] font-mono text-red-300 max-w-md break-words">DATA UNAVAILABLE</div>
+      <div className="text-[11px] font-mono text-red-300 max-w-md break-words">
+        {t("DATA UNAVAILABLE")}
+      </div>
       <div className="text-[11px] text-slate-500 max-w-md break-words">{message}</div>
       {onRetry && (
         <button
           onClick={onRetry}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider border border-emerald-700 text-emerald-300 hover:bg-emerald-900/40 transition-colors"
         >
-          <RefreshCw className="w-3.5 h-3.5" /> Retry
+          <RefreshCw className="w-3.5 h-3.5" /> {t("Retry")}
         </button>
       )}
     </div>
@@ -155,9 +160,10 @@ export function ErrorBlock({ message, onRetry }: { message: string; onRetry?: ()
 }
 
 export function EmptyBlock({ label = "NO RECORDS FOUND", hint }: { label?: string; hint?: string }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center gap-1.5 py-8 text-center">
-      <div className="text-[11px] font-mono tracking-widest text-slate-500">{label}</div>
+      <div className="text-[11px] font-mono tracking-widest text-slate-500">{t(label)}</div>
       {hint && <div className="text-[11px] text-slate-600">{hint}</div>}
     </div>
   );
@@ -237,6 +243,7 @@ export function SourceStrip({
 }) {
   const source = meta?.source ?? "—";
   const status = meta?.source_status ?? "UNAVAILABLE";
+  const t = useT();
   const updated = meta?.last_updated;
   const age = meta?.data_age_seconds;
   return (
@@ -244,19 +251,19 @@ export function SourceStrip({
       className={`flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-1.5 border-t border-line bg-panel2/60 text-[9px] font-mono tracking-wider text-slate-500 uppercase ${className}`}
     >
       <span className="truncate max-w-[45%]">
-        SOURCE: <span className="text-slate-300">{source}</span>
+        {t("SOURCE")}: <span className="text-slate-300">{source}</span>
       </span>
       <span>
-        LAST UPDATED: <span className="text-slate-300">{formatDateTime(updated)}</span>
+        {t("LAST UPDATED")}: <span className="text-slate-300">{formatDateTime(updated)}</span>
       </span>
       <span>
-        DATA AGE:{" "}
+        {t("DATA AGE")}:{" "}
         <span className="text-slate-300">
           {typeof age === "number" ? ageLabel(age) : "—"}
         </span>
       </span>
       <span className="flex items-center gap-1.5">
-        STATUS: <StatusPill status={status} />
+        {t("STATUS")}: <StatusPill status={status} />
       </span>
       {extra}
     </div>
@@ -290,9 +297,10 @@ export function RiskBadge({ level, score }: { level: string; score?: number }) {
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) {
+  const t = useT();
   return (
     <div className="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
-      {children}
+      {typeof children === "string" ? t(children) : children}
     </div>
   );
 }
@@ -347,13 +355,14 @@ export function PageHeader({
   actions?: ReactNode;
   badge?: ReactNode;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
           <span className="w-1 h-5 bg-emerald-500 rounded-sm" />
           <h1 className="text-lg font-black font-mono uppercase tracking-[0.18em] text-slate-100">
-            {title}
+            {t(title)}
           </h1>
           {badge}
         </div>
@@ -376,6 +385,7 @@ export function Notice({
   title: string;
   children?: ReactNode;
 }) {
+  const t = useT();
   const tones = {
     amber: "border-amber-700/50 bg-amber-950/30 text-amber-200",
     red: "border-red-700/50 bg-red-950/30 text-red-200",
@@ -384,7 +394,7 @@ export function Notice({
   } as const;
   return (
     <div className={`rounded border px-3 py-2 text-[11px] font-mono leading-relaxed ${tones[tone]}`}>
-      <span className="font-bold tracking-wider uppercase">{title}</span>
+      <span className="font-bold tracking-wider uppercase">{t(title)}</span>
       {children && <span className="text-slate-300"> — {children}</span>}
     </div>
   );

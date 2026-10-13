@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { useScenario } from "../hooks/useScenario";
@@ -89,6 +89,11 @@ export function AppShell() {
       window.clearInterval(id);
     };
   }, [version]);
+
+  // The command center requires a signed-in account; the auth pages live
+  // outside this shell (see App.tsx routes). All hooks above are
+  // unconditional so the early return never changes the hook order.
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen bg-ink text-slate-300">

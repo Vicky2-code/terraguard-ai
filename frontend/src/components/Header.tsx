@@ -12,6 +12,8 @@ import {
 import { formatIST, formatTime, useClock } from "../hooks/useClock";
 import { useLive } from "../hooks/useLive";
 import { btnDanger, btnGhost, Notice, Panel } from "./ui";
+import { useT } from "../lib/i18n";
+import { LangSwitcher } from "./LangSwitcher";
 
 export interface HeaderProps {
   onToggleSidebar: () => void;
@@ -75,6 +77,7 @@ function ScenarioModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  const t = useT();
   if (!open) return null;
   return (
     <div
@@ -87,27 +90,30 @@ function ScenarioModal({
         <div className="flex items-center gap-2 px-4 py-3 border-b border-line bg-red-950/40">
           <ShieldAlert className="w-4 h-4 text-red-400" />
           <span className="text-xs font-mono font-bold tracking-[0.16em] uppercase text-red-300">
-            Run Emergency Scenario?
+            {t("Run Emergency Scenario?")}
           </span>
         </div>
         <div className="p-4 space-y-3">
           <Notice tone="purple" title="SIMULATION MODE">
-            This runs a scripted simulation inside the platform. No SMS, email, siren or any real
-            notification is sent to anyone.
+            {t(
+              "This runs a scripted simulation inside the platform. No SMS, email, siren or any real notification is sent to anyone.",
+            )}
           </Notice>
           <ul className="text-[11px] font-mono text-slate-400 space-y-1.5 list-disc pl-5">
-            <li>Risk scores on affected locations will change over successive steps.</li>
-            <li>Simulated alerts and timeline events are generated and stored.</li>
-            <li>Every simulated alert is flagged SIMULATED_LOCAL.</li>
-            <li>Current state: <span className="text-slate-200">{current}</span></li>
+            <li>{t("Risk scores on affected locations will change over successive steps.")}</li>
+            <li>{t("Simulated alerts and timeline events are generated and stored.")}</li>
+            <li>{t("Every simulated alert is flagged SIMULATED_LOCAL.")}</li>
+            <li>
+              {t("Current state")}: <span className="text-slate-200">{current}</span>
+            </li>
           </ul>
         </div>
         <div className="flex justify-end gap-2 px-4 py-3 border-t border-line bg-panel2/70">
           <button onClick={onClose} className={btnGhost} disabled={busy}>
-            Cancel
+            {t("Cancel")}
           </button>
           <button onClick={onConfirm} className={btnDanger} disabled={busy}>
-            {busy ? "WORKING…" : "CONFIRM — START SIMULATION"}
+            {busy ? "WORKING…" : t("CONFIRM — START SIMULATION")}
           </button>
         </div>
       </div>
@@ -121,6 +127,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
   const now = useClock();
   const { status, lastSyncAt, stale, transport, backend } = useLive();
   const [modalOpen, setModalOpen] = useState(false);
+  const t = useT();
 
   const running = scenario?.state === "RUNNING";
   const paused = scenario?.state === "PAUSED";
@@ -142,7 +149,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
           <button
             onClick={onToggleSidebar}
             className="lg:hidden p-2 sm:p-1.5 rounded hover:bg-slate-800 text-slate-400 border border-slate-700/60"
-            aria-label="Toggle navigation"
+            aria-label={t("Toggle navigation")}
           >
             <Menu className="w-4 h-4" />
           </button>
@@ -157,7 +164,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
                 TERRAGUARD <span className="text-emerald-400">AI</span>
               </div>
               <p className="text-[9px] text-slate-500 hidden sm:block tracking-wide font-mono truncate">
-                NER Early Warning &amp; Landslide Risk Monitoring Center
+                {t("NER Early Warning & Landslide Risk Monitoring Center")}
               </p>
             </div>
           </Link>
@@ -178,11 +185,11 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
             label={
               !lastSyncAt
                 ? status === "OFFLINE"
-                  ? "NO SYNC YET"
-                  : "SYNCING…"
+                  ? t("NO SYNC YET")
+                  : t("SYNCING…")
                 : stale
-                  ? "DATA STALE"
-                  : `SYNCED ${lastSyncAt ? formatTime(lastSyncAt) : "—"}`
+                  ? t("DATA STALE")
+                  : `${t("SYNCED")} ${lastSyncAt ? formatTime(lastSyncAt) : "—"}`
             }
           />
           <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">
@@ -200,7 +207,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
         <div className="flex items-center gap-2">
           {running && (
             <span className="hidden md:flex items-center gap-1.5 px-2 py-[3px] rounded border border-purple-600/70 bg-purple-950/50 text-purple-300 text-[9px] font-mono font-bold tracking-widest uppercase blink">
-              <Radio className="w-3 h-3" /> SIMULATION ACTIVE
+              <Radio className="w-3 h-3" /> {t("SIMULATION ACTIVE")}
             </span>
           )}
           <button
@@ -216,7 +223,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-red-600/90 hover:bg-red-500 text-white border-red-400 shadow-md shadow-red-950 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            Run Emergency Scenario
+            {t("Run Emergency Scenario")}
           </button>
           <button
             onClick={() => setModalOpen(true)}
@@ -236,6 +243,8 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
             </button>
           )}
 
+          <LangSwitcher compact />
+
           <div className="hidden md:flex items-center gap-2 pl-2 border-l border-line">
             <div className="flex items-center gap-1.5 text-slate-400">
               <UserRound className="w-3.5 h-3.5" />
@@ -246,7 +255,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
                     <span className="text-slate-500"> · {user.role}</span>
                   </>
                 ) : (
-                  <span className="text-slate-500">GUEST</span>
+                  <span className="text-slate-500">{t("GUEST")}</span>
                 )}
               </span>
             </div>
@@ -255,7 +264,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
                 onClick={onSignOut}
                 className="text-[9px] font-mono text-slate-500 hover:text-red-400 uppercase tracking-wider"
               >
-                Sign out
+                {t("Sign out")}
               </button>
             )}
           </div>
@@ -277,14 +286,14 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
           label={
             !lastSyncAt
               ? status === "OFFLINE"
-                ? "NO SYNC YET"
-                : "SYNCING…"
+                ? t("NO SYNC YET")
+                : t("SYNCING…")
               : stale
-                ? "DATA STALE"
-                : "SYNCED"
+                ? t("DATA STALE")
+                : t("SYNCED")
           }
         />
-        {running && <Pill tone="red" label="SIMULATION ACTIVE" dot />}
+        {running && <Pill tone="red" label={t("SIMULATION ACTIVE")} dot />}
       </div>
 
       <ScenarioModal
@@ -313,40 +322,44 @@ export function ScenarioBanner({
   busy?: boolean;
   act: (action: "start" | "pause" | "reset" | "step") => Promise<unknown>;
 }) {
+  const t = useT();
   if (state === "IDLE" && !error) return null;
   return (
     <Panel
       className="mb-4"
-      title={`EMERGENCY SCENARIO — ${state}`}
+      title={`${t("EMERGENCY SCENARIO")} — ${state}`}
       icon={<Radio className="w-3.5 h-3.5" />}
       accent={state === "RUNNING" ? "#c084fc" : state === "PAUSED" ? "#facc15" : "#94a3b8"}
       actions={
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono text-slate-500">STEP {step}</span>
+          <span className="text-[10px] font-mono text-slate-500">
+            {t("STEP")} {step}
+          </span>
           {state === "RUNNING" && (
             <button
               onClick={() => void act("pause")}
               disabled={busy}
               className={btnGhost}
             >
-              <Pause className="w-3 h-3" /> Pause
+              <Pause className="w-3 h-3" /> {t("Pause")}
             </button>
           )}
           {state === "PAUSED" && (
             <button onClick={() => void act("start")} disabled={busy} className={btnGhost}>
-              <Play className="w-3 h-3" /> Resume
+              <Play className="w-3 h-3" /> {t("Resume")}
             </button>
           )}
           <button onClick={() => void act("reset")} disabled={busy} className={btnGhost}>
-            <RotateCcw className="w-3 h-3" /> Reset
+            <RotateCcw className="w-3 h-3" /> {t("Reset")}
           </button>
         </div>
       }
     >
       <div className="space-y-2">
         <Notice tone="purple" title="SIMULATION MODE">
-          Scripted simulation — risk changes, alerts and timeline events are synthetic and flagged
-          SIMULATED_LOCAL. No real notifications are delivered.
+          {t(
+            "Scripted simulation — risk changes, alerts and timeline events are synthetic and flagged SIMULATED_LOCAL. No real notifications are delivered.",
+          )}
         </Notice>
         {error && <div className="text-[11px] font-mono text-red-400">{error}</div>}
       </div>

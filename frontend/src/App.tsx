@@ -22,6 +22,7 @@ import ModelGovernance from "./pages/ModelGovernance";
 import DataPipeline from "./pages/DataPipeline";
 import AdminData from "./pages/AdminData";
 import Settings from "./pages/Settings";
+import { LoginPage, RegisterPage } from "./pages/Auth";
 import { PageHeader, Panel } from "./components/ui";
 
 function NotFound() {
@@ -51,6 +52,8 @@ export default function App() {
     <LiveProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route element={<AppShell />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
