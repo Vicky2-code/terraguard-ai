@@ -25,19 +25,32 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def iso(dt: Optional[datetime]) -> Optional[str]:
+def naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    """Coerce a datetime to naive UTC.
+
+    SQLite returns naive datetimes, but PostgreSQL `TIMESTAMP WITH TIME ZONE`
+    columns come back timezone-aware. All stored timestamps represent UTC, so
+    normalizing to naive UTC makes comparisons/serialization behave identically
+    on both backends.
+    """
     if dt is None:
         return None
     if dt.tzinfo is not None:
-        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
+
+def iso(dt: Optional[datetime]) -> Optional[str]:
+    dt = naive_utc(dt)
+    if dt is None:
+        return None
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def age_seconds(dt: Optional[datetime]) -> Optional[int]:
+    dt = naive_utc(dt)
     if dt is None:
         return None
-    if dt.tzinfo is not None:
-        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
     return max(0, int((utcnow() - dt).total_seconds()))
 
 

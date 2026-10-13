@@ -20,6 +20,7 @@ from app.services.common import (
     get_bands,
     iso,
     location_dict,
+    naive_utc,
     utcnow,
 )
 from app.services.weather import weather_meta
@@ -100,9 +101,10 @@ def risk_map(
     locations = query.all()
     features = []
     for loc in locations:
-        if from_dt and (loc.assessed_at is None or loc.assessed_at < from_dt):
+        assessed_at = naive_utc(loc.assessed_at)
+        if from_dt and (assessed_at is None or assessed_at < from_dt):
             continue
-        if to_dt and (loc.assessed_at is None or loc.assessed_at > to_dt):
+        if to_dt and (assessed_at is None or assessed_at > to_dt):
             continue
         features.append(location_dict(loc))
 

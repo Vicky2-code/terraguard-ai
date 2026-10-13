@@ -20,7 +20,7 @@ from sqlalchemy import func
 from app import config
 from app.database.db import get_db
 from app.models.entities import Alert, EnvironmentalData, Incident, Location, Prediction
-from app.services.common import get_bands, iso, utcnow
+from app.services.common import get_bands, iso, naive_utc, utcnow
 from app.services.weather import weather_meta
 
 router = APIRouter(prefix="/api", tags=["Analytics"])
@@ -62,6 +62,7 @@ def _bucket_starts(start: datetime, end: datetime, granularity: str) -> list[dat
 
 def _bucket_of(starts: list[datetime], moment: datetime) -> datetime | None:
     """Return the bucket start covering `moment` (buckets are [start, next_start))."""
+    moment = naive_utc(moment)
     if not starts or moment is None or moment < starts[0]:
         return None
     lo, hi = 0, len(starts) - 1
