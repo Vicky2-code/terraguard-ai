@@ -13,6 +13,7 @@ import { Clock } from "lucide-react";
 import { DataState, PageHeader, Panel, SourceStrip } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { TemporalResponse } from "../lib/types";
 
 const RANGES = ["24h", "7d", "30d"] as const;
@@ -30,6 +31,7 @@ const TOOLTIP_STYLE = {
 };
 
 export default function TemporalAnalysis() {
+  const t = useT();
   const [range, setRange] = useState<(typeof RANGES)[number]>("7d");
   const [granularity, setGranularity] = useState<(typeof GRANULARITIES)[number]>("day");
 
@@ -39,7 +41,7 @@ export default function TemporalAnalysis() {
     { pollMs: 120000 },
   );
 
-  const t = temporal.data;
+  const temporalData = temporal.data;
 
   const charts: { title: string; key: keyof TemporalResponse; color: string; unit: string }[] = [
     { title: "RAINFALL", key: "rainfall", color: "#34d399", unit: "mm" },
@@ -81,7 +83,7 @@ export default function TemporalAnalysis() {
                       : "bg-panel2 text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  {g}
+                  {t(g.toUpperCase())}
                 </button>
               ))}
             </div>
@@ -98,11 +100,11 @@ export default function TemporalAnalysis() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {charts.map((c) => {
-            const data = (t?.[c.key] ?? []) as { time: string; value: number }[];
+            const data = (temporalData?.[c.key] ?? []) as { time: string; value: number }[];
             return (
               <Panel
                 key={c.title}
-                title={`${c.title} — ${granularity.toUpperCase()} BUCKETS (${range})`}
+                title={`${t(c.title)} — ${granularity.toUpperCase()} ${t("BUCKETS")} (${range})`}
                 icon={<Clock className="w-3.5 h-3.5" />}
                 actions={
                   <span className="text-[9px] font-mono" style={{ color: c.color }}>
@@ -113,10 +115,10 @@ export default function TemporalAnalysis() {
                 {data.length === 0 ? (
                   <div className="flex flex-col items-center gap-1.5 py-10 text-center">
                     <div className="text-[11px] font-mono tracking-widest text-slate-500">
-                      NO SERIES DATA
+                      {t("NO SERIES DATA")}
                     </div>
                     <div className="text-[10px] text-slate-600">
-                      Backend returned zero buckets for this range/granularity.
+                      {t("Backend returned zero buckets for this range/granularity.")}
                     </div>
                   </div>
                 ) : (
@@ -138,7 +140,7 @@ export default function TemporalAnalysis() {
                     </LineChart>
                   </ResponsiveContainer>
                 )}
-                <SourceStrip meta={t?.meta ?? null} />
+                <SourceStrip meta={temporalData?.meta ?? null} />
               </Panel>
             );
           })}

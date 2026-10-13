@@ -12,10 +12,12 @@ import { useApi } from "../hooks/useApi";
 import { useLive } from "../hooks/useLive";
 import { formatDateTime, timeAgo } from "../hooks/useClock";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { LocationRec, RiskMapResponse } from "../lib/types";
 
 export default function GisMonitor() {
   const { version, status } = useLive();
+  const t = useT();
   const [selected, setSelected] = useState<LocationRec | null>(null);
 
   const map = useApi<RiskMapResponse>(
@@ -66,7 +68,7 @@ export default function GisMonitor() {
             title="SELECTION"
             icon={<Layers className="w-3.5 h-3.5" />}
             actions={
-              <span className="text-[9px] font-mono text-slate-600">CLICK A MARKER</span>
+              <span className="text-[9px] font-mono text-slate-600">{t("CLICK A MARKER")}</span>
             }
           >
             {selected ? (
@@ -76,37 +78,37 @@ export default function GisMonitor() {
                   <RiskBadge level={selected.risk_level} score={selected.risk_score} />
                 </div>
                 <div className="grid grid-cols-2 gap-y-1 text-slate-400">
-                  <span>DISTRICT</span>
+                  <span>{t("DISTRICT")}</span>
                   <span className="text-slate-200 text-right">{selected.district ?? "—"}</span>
-                  <span>STATE</span>
+                  <span>{t("STATE")}</span>
                   <span className="text-slate-200 text-right">{selected.state}</span>
-                  <span>LAT/LON</span>
+                  <span>{t("LAT/LON")}</span>
                   <span className="text-slate-200 text-right tabular-nums">
                     {selected.latitude.toFixed(3)}, {selected.longitude.toFixed(3)}
                   </span>
-                  <span>ELEVATION</span>
+                  <span>{t("ELEVATION")}</span>
                   <span className="text-slate-200 text-right">
                     {selected.elevation_m != null ? `${selected.elevation_m} m` : "—"}
                   </span>
-                  <span>SLOPE</span>
+                  <span>{t("SLOPE")}</span>
                   <span className="text-slate-200 text-right">
                     {selected.slope_deg != null ? `${selected.slope_deg}°` : "—"}
                   </span>
-                  <span>LAND COVER</span>
+                  <span>{t("LAND COVER")}</span>
                   <span className="text-slate-200 text-right">{selected.land_cover ?? "—"}</span>
-                  <span>POPULATION</span>
+                  <span>{t("POPULATION")}</span>
                   <span className="text-slate-200 text-right tabular-nums">
                     {selected.population?.toLocaleString("en-IN") ?? "—"}
                   </span>
-                  <span>RAIN 24H</span>
+                  <span>{t("RAIN 24H")}</span>
                   <span className="text-slate-200 text-right">
                     {selected.rainfall_mm_24h != null ? `${selected.rainfall_mm_24h} mm` : "—"}
                   </span>
-                  <span>SOIL MOISTURE</span>
+                  <span>{t("SOIL MOISTURE")}</span>
                   <span className="text-slate-200 text-right">
                     {selected.soil_moisture != null ? `${selected.soil_moisture}%` : "—"}
                   </span>
-                  <span>ASSESSED</span>
+                  <span>{t("ASSESSED")}</span>
                   <span className="text-slate-200 text-right">
                     {formatDateTime(selected.assessed_at)}
                   </span>
@@ -114,16 +116,16 @@ export default function GisMonitor() {
               </div>
             ) : (
               <div className="text-[11px] font-mono text-slate-500 py-6 text-center">
-                NO MARKER SELECTED
+                {t("NO MARKER SELECTED")}
                 <div className="text-[10px] text-slate-600 mt-1">
-                  Zoom, pan, hover tooltips and popups are enabled.
+                  {t("Zoom, pan, hover tooltips and popups are enabled.")}
                 </div>
               </div>
             )}
           </Panel>
 
           <Panel
-            title={`LAYER INDEX (${features.length})`}
+            title={`${t("LAYER INDEX")} (${features.length})`}
             icon={<List className="w-3.5 h-3.5" />}
             bodyClassName="p-0"
           >

@@ -10,13 +10,13 @@ import { LANGUAGES } from "../lib/i18n";
 export function LangSwitcher({ compact = false }: { compact?: boolean }) {
   const { lang, setLang } = useLang();
   return (
-    <label className="flex items-center gap-1.5" title="Language / भाषा / ভাষা">
+    <label className="flex items-center gap-1.5" title="Language / भाषा / অসমীয়া / বাংলা / தமிழ்">
       <span className="sr-only">Language</span>
       <select
         value={lang}
         onChange={(e) => setLang(e.target.value as Lang)}
         className={`bg-panel2 border border-line rounded text-[10px] font-mono text-slate-300 hover:border-emerald-600 focus:border-emerald-600 focus:outline-none transition-colors cursor-pointer ${
-          compact ? "px-1.5 py-1" : "px-2 py-1.5"
+          compact ? "h-8 px-1.5 py-0 leading-none" : "px-2 py-1.5"
         }`}
         aria-label="Select language"
       >

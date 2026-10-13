@@ -14,6 +14,7 @@ import { useApi } from "../hooks/useApi";
 import { useLive } from "../hooks/useLive";
 import { formatDateTime, timeAgo } from "../hooks/useClock";
 import { getJSON, patchJSON, putJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { Alert, AlertList, SettingsResponse, Thresholds } from "../lib/types";
 
 const BANDS: { key: keyof Thresholds; label: string; range: string }[] = [
@@ -25,6 +26,7 @@ const BANDS: { key: keyof Thresholds; label: string; range: string }[] = [
 
 export default function EarlyAlerts() {
   const { version } = useLive();
+  const t = useT();
   const [statusFilter, setStatusFilter] = useState("OPEN");
   const [levelFilter, setLevelFilter] = useState("");
   const [thresholds, setThresholds] = useState<Thresholds | null>(null);
@@ -115,7 +117,7 @@ export default function EarlyAlerts() {
               >
                 {["OPEN", "ACKNOWLEDGED", "RESOLVED", ""].map((s) => (
                   <option key={s} value={s}>
-                    {s === "" ? "ALL STATUS" : s}
+                    {s === "" ? t("ALL STATUS") : s}
                   </option>
                 ))}
               </select>
@@ -125,7 +127,7 @@ export default function EarlyAlerts() {
                 onChange={(e) => setLevelFilter(e.target.value)}
                 aria-label="Filter by risk level"
               >
-                <option value="">ALL LEVELS</option>
+                <option value="">{t("ALL LEVELS")}</option>
                 {["LOW", "MODERATE", "HIGH", "VERY_HIGH", "CRITICAL"].map((s) => (
                   <option key={s} value={s}>
                     {s}
@@ -148,13 +150,13 @@ export default function EarlyAlerts() {
               <table className="w-full text-[11px] font-mono">
                 <thead>
                   <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">
-                    <th className="px-3 py-2">Level</th>
-                    <th className="px-3 py-2">Location</th>
-                    <th className="px-3 py-2">Score</th>
-                    <th className="px-3 py-2 hidden md:table-cell">Trigger</th>
-                    <th className="px-3 py-2 hidden lg:table-cell">Message</th>
-                    <th className="px-3 py-2">Created</th>
-                    <th className="px-3 py-2">Delivery</th>
+                    <th className="px-3 py-2">{t("Level")}</th>
+                    <th className="px-3 py-2">{t("Location")}</th>
+                    <th className="px-3 py-2">{t("Score")}</th>
+                    <th className="px-3 py-2 hidden md:table-cell">{t("Trigger")}</th>
+                    <th className="px-3 py-2 hidden lg:table-cell">{t("Message")}</th>
+                    <th className="px-3 py-2">{t("Created")}</th>
+                    <th className="px-3 py-2">{t("Delivery")}</th>
                     <th className="px-3 py-2" />
                   </tr>
                 </thead>
@@ -192,7 +194,7 @@ export default function EarlyAlerts() {
                             onClick={() => void ack(a.id)}
                             className="inline-flex items-center gap-1 px-2 py-1 rounded border border-emerald-700 text-emerald-400 hover:bg-emerald-950/60 text-[9px] font-bold uppercase"
                           >
-                            <Check className="w-3 h-3" /> Ack
+                            <Check className="w-3 h-3" /> {t("Ack")}
                           </button>
                         )}
                       </td>
@@ -220,7 +222,7 @@ export default function EarlyAlerts() {
               {BANDS.map((b) => (
                 <div key={b.key} className="rounded border border-line bg-panel2 px-2 py-1.5">
                   <div className="text-[9px] font-mono text-slate-500 text-center">
-                    {b.label.toUpperCase()}
+                    {t(b.label).toUpperCase()}
                   </div>
                   <input
                     type="number"
@@ -246,7 +248,7 @@ export default function EarlyAlerts() {
               disabled={saving || !thresholds}
               className={btnPrimary + " w-full"}
             >
-              {saving ? "SAVING…" : "SAVE THRESHOLDS"}
+              {saving ? t("SAVING…") : t("SAVE THRESHOLDS")}
             </button>
             {saveMsg && (
               <div className="text-[10px] font-mono text-emerald-400 border border-emerald-800/60 bg-emerald-950/30 rounded px-2 py-1.5">
@@ -261,7 +263,7 @@ export default function EarlyAlerts() {
 
             <div className="border-t border-line pt-2 space-y-1">
               <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                Current distribution
+                {t("Current distribution")}
               </div>
               {Object.keys(counts).length === 0 && !alerts.loading && !alerts.error && (
                 <EmptyBlock label="NO OPEN ALERTS" />
@@ -274,7 +276,7 @@ export default function EarlyAlerts() {
               ))}
               {settings.data?.updated_at && (
                 <div className="text-[9px] font-mono text-slate-600 pt-1">
-                  SETTINGS UPDATED {formatDateTime(settings.data.updated_at)}
+                  {t("SETTINGS UPDATED")} {formatDateTime(settings.data.updated_at)}
                 </div>
               )}
             </div>

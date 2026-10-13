@@ -84,7 +84,7 @@ function ScenarioModal({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Confirm emergency scenario"
+      aria-label={t("Confirm emergency scenario")}
     >
       <div className="w-full max-w-md rounded-lg border border-line bg-panel shadow-2xl shadow-black/60 overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-line bg-red-950/40">
@@ -113,7 +113,7 @@ function ScenarioModal({
             {t("Cancel")}
           </button>
           <button onClick={onConfirm} className={btnDanger} disabled={busy}>
-            {busy ? "WORKING…" : t("CONFIRM — START SIMULATION")}
+            {busy ? t("WORKING…") : t("CONFIRM — START SIMULATION")}
           </button>
         </div>
       </div>
@@ -163,7 +163,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
               <div className="text-[13px] font-black font-mono tracking-[0.2em] text-slate-100 leading-tight whitespace-nowrap">
                 TERRAGUARD <span className="text-emerald-400">AI</span>
               </div>
-              <p className="text-[9px] text-slate-500 hidden sm:block tracking-wide font-mono truncate">
+              <p className="text-[9px] text-slate-500 hidden xl:block tracking-wide font-mono truncate">
                 {t("NER Early Warning & Landslide Risk Monitoring Center")}
               </p>
             </div>
@@ -177,7 +177,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
           </span>
           <Pill
             tone={status === "CONNECTED" ? "green" : status === "OFFLINE" ? "red" : "amber"}
-            label={status === "RECONNECTING" && !lastSyncAt ? "CONNECTING" : status}
+            label={status === "RECONNECTING" && !lastSyncAt ? t("CONNECTING") : status}
             dot
           />
           <Pill
@@ -204,7 +204,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
         </div>
 
         {/* right: scenario controls + user */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {running && (
             <span className="hidden md:flex items-center gap-1.5 px-2 py-[3px] rounded border border-purple-600/70 bg-purple-950/50 text-purple-300 text-[9px] font-mono font-bold tracking-widest uppercase blink">
               <Radio className="w-3 h-3" /> {t("SIMULATION ACTIVE")}
@@ -215,29 +215,29 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
             disabled={running || paused}
             title={
               running
-                ? "Scenario is running — pause or reset from the dashboard banner"
+                ? t("Scenario is running — pause or reset from the dashboard banner")
                 : paused
-                  ? "Scenario paused — resume from the dashboard banner"
-                  : "Simulate a heavy-rainfall escalation scenario (no real alerts are sent)"
+                  ? t("Scenario paused — resume from the dashboard banner")
+                  : t("Simulate a heavy-rainfall escalation scenario (no real alerts are sent)")
             }
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold tracking-wider uppercase border transition-all bg-red-600/90 hover:bg-red-500 text-white border-red-400 shadow-md shadow-red-950 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="hidden md:inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded text-[11px] font-mono font-bold tracking-wider uppercase leading-none whitespace-nowrap border transition-all bg-red-600/90 hover:bg-red-500 text-white border-red-400 shadow-md shadow-red-950 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            {t("Run Emergency Scenario")}
+            <Play className="w-3.5 h-3.5 fill-current shrink-0" />
+            <span>{t("Run Emergency Scenario")}</span>
           </button>
           <button
             onClick={() => setModalOpen(true)}
             disabled={running || paused}
-            className="sm:hidden p-1.5 rounded bg-red-600/90 text-white border border-red-400 disabled:opacity-40"
-            aria-label="Run emergency scenario"
+            className="md:hidden inline-flex items-center justify-center h-8 w-8 rounded bg-red-600/90 text-white border border-red-400 shadow-md shadow-red-950 disabled:opacity-40 shrink-0"
+            aria-label={t("Run Emergency Scenario")}
           >
             <Play className="w-3.5 h-3.5 fill-current" />
           </button>
           {paused && scenario?.act && (
             <button
               onClick={() => void scenario.act?.("reset")}
-              className="hidden md:flex p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/60"
-              title="Reset scenario to baseline"
+              className="hidden md:inline-flex items-center justify-center h-8 w-8 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/60 shrink-0"
+              title={t("Reset scenario to baseline")}
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -278,7 +278,7 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
         </span>
         <Pill
           tone={status === "CONNECTED" ? "green" : status === "OFFLINE" ? "red" : "amber"}
-          label={status === "RECONNECTING" && !lastSyncAt ? "CONNECTING" : status}
+          label={status === "RECONNECTING" && !lastSyncAt ? t("CONNECTING") : status}
           dot
         />
         <Pill

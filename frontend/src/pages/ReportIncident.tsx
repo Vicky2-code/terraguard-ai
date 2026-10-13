@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CheckCircle2, MapPin, Send } from "lucide-react";
 import { btnGhost, btnPrimary, Field, inputCls, Notice, PageHeader, Panel } from "../components/ui";
 import { postJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { Incident } from "../lib/types";
 
 const TYPES = [
@@ -51,6 +52,7 @@ const EMPTY: FormState = {
 
 export default function ReportIncident() {
   const nav = useNavigate();
+  const t = useT();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [busy, setBusy] = useState(false);
@@ -64,16 +66,16 @@ export default function ReportIncident() {
   const validate = (): boolean => {
     const errs: Partial<Record<keyof FormState, string>> = {};
     if (form.description.trim().length < 10)
-      errs.description = "Describe the incident in at least 10 characters";
+      errs.description = t("Describe the incident in at least 10 characters");
     if (form.location_name.trim().length < 2)
-      errs.location_name = "Location name is required";
-    if (form.reporter.trim().length < 2) errs.reporter = "Reporter name is required";
+      errs.location_name = t("Location name is required");
+    if (form.reporter.trim().length < 2) errs.reporter = t("Reporter name is required");
     const lat = form.latitude.trim() === "" ? null : Number(form.latitude);
     const lon = form.longitude.trim() === "" ? null : Number(form.longitude);
     if (lat !== null && (!Number.isFinite(lat) || lat < -90 || lat > 90))
-      errs.latitude = "Latitude must be between -90 and 90";
+      errs.latitude = t("Latitude must be between -90 and 90");
     if (lon !== null && (!Number.isFinite(lon) || lon < -180 || lon > 180))
-      errs.longitude = "Longitude must be between -180 and 180";
+      errs.longitude = t("Longitude must be between -180 and 180");
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -117,14 +119,14 @@ export default function ReportIncident() {
               {done.region ? ` · ${done.region}` : ""}
             </div>
             <div className="text-[10px] font-mono text-slate-600">
-              PERSISTED VIA API — VISIBLE ON DASHBOARD, MAP AND FIELD INCIDENTS
+              {t("PERSISTED VIA API — VISIBLE ON DASHBOARD, MAP AND FIELD INCIDENTS")}
             </div>
             <div className="flex gap-2 pt-2">
               <button onClick={() => setDone(null)} className={btnGhost}>
-                Report another
+                {t("Report another")}
               </button>
               <button onClick={() => nav("/field-incidents")} className={btnPrimary}>
-                View in Field Incidents
+                {t("View in Field Incidents")}
               </button>
             </div>
           </div>
@@ -140,8 +142,7 @@ export default function ReportIncident() {
         subtitle="FIELD OFFICER INTAKE · VALIDATED CLIENT-SIDE AND SERVER-SIDE · POSTGRESQL PERSISTENCE"
       />
       <Notice tone="green" title="PERSISTENT">
-        Incidents are stored in PostgreSQL (not browser localStorage) and appear everywhere in the
-        platform after submission.
+        {t("Incidents are stored in PostgreSQL (not browser localStorage) and appear everywhere in the platform after submission.")}
       </Notice>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
@@ -150,15 +151,15 @@ export default function ReportIncident() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <Field label="INCIDENT TYPE">
                 <select className={inputCls} value={form.type} onChange={set("type")}>
-                  {TYPES.map((t) => (
-                    <option key={t}>{t}</option>
+                  {TYPES.map((ty) => (
+                    <option key={ty}>{ty}</option>
                   ))}
                 </select>
               </Field>
               <Field label="SEVERITY">
                 <select className={inputCls} value={form.severity} onChange={set("severity")}>
-                  {SEVERITIES.map((t) => (
-                    <option key={t}>{t}</option>
+                  {SEVERITIES.map((sv) => (
+                    <option key={sv}>{sv}</option>
                   ))}
                 </select>
               </Field>
@@ -172,8 +173,8 @@ export default function ReportIncident() {
               </Field>
               <Field label="REGION / STATE">
                 <select className={inputCls} value={form.region} onChange={set("region")}>
-                  {REGIONS.map((t) => (
-                    <option key={t}>{t}</option>
+                  {REGIONS.map((rg) => (
+                    <option key={rg}>{rg}</option>
                   ))}
                 </select>
               </Field>
@@ -217,13 +218,13 @@ export default function ReportIncident() {
 
             {serverErr && (
               <div className="mt-3 text-[11px] font-mono text-red-400 border border-red-800/60 bg-red-950/30 rounded px-2.5 py-2">
-                SUBMISSION FAILED: {serverErr}
+                {t("SUBMISSION FAILED")}: {serverErr}
               </div>
             )}
 
             <div className="flex gap-2 mt-4">
               <button type="submit" disabled={busy} className={btnPrimary}>
-                <Send className="w-3.5 h-3.5" /> {busy ? "SUBMITTING…" : "SUBMIT INCIDENT"}
+                <Send className="w-3.5 h-3.5" /> {busy ? t("SUBMITTING…") : t("SUBMIT INCIDENT")}
               </button>
               <button
                 type="button"
@@ -234,7 +235,7 @@ export default function ReportIncident() {
                   setServerErr(null);
                 }}
               >
-                Clear
+                {t("Clear")}
               </button>
             </div>
           </Panel>
@@ -243,11 +244,11 @@ export default function ReportIncident() {
         <div className="space-y-4">
           <Panel title="INTAKE NOTES" icon={<MapPin className="w-3.5 h-3.5" />}>
             <ul className="space-y-2 text-[11px] font-mono text-slate-400 list-disc pl-4">
-              <li>A public incident ID (INC-YYYY-NNNN) is generated server-side.</li>
-              <li>Open incidents feed the dashboard KPIs and map markers.</li>
-              <li>Status transitions happen on the Field Incidents page.</li>
-              <li>No SMS or email is triggered by this form.</li>
-              <li>Lat/lon are optional — location name is enough to file.</li>
+              <li>{t("A public incident ID (INC-YYYY-NNNN) is generated server-side.")}</li>
+              <li>{t("Open incidents feed the dashboard KPIs and map markers.")}</li>
+              <li>{t("Status transitions happen on the Field Incidents page.")}</li>
+              <li>{t("No SMS or email is triggered by this form.")}</li>
+              <li>{t("Lat/lon are optional — location name is enough to file.")}</li>
             </ul>
           </Panel>
         </div>

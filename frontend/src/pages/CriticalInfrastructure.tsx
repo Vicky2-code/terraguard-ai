@@ -4,6 +4,7 @@ import { DataState, PageHeader, Panel, RiskBadge, SourceStrip } from "../compone
 import { RiskMap, RISK_COLORS } from "../components/RiskMap";
 import { useApi } from "../hooks/useApi";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { Infrastructure, LocationRec } from "../lib/types";
 
 const CRIT_TONE: Record<string, string> = {
@@ -40,6 +41,7 @@ function toFeatures(items: Infrastructure[]): LocationRec[] {
 }
 
 export default function CriticalInfrastructure() {
+  const t = useT();
   const assets = useApi<Infrastructure[]>(
     () => getJSON<Infrastructure[]>("/api/infrastructure"),
     [],
@@ -55,7 +57,7 @@ export default function CriticalInfrastructure() {
         subtitle="ASSETS, CRITICALITY AND EXPOSURE · /api/infrastructure"
         badge={
           <span className="px-2 py-[2px] rounded bg-panel2 border border-line text-[10px] font-mono text-slate-400 tabular-nums">
-            {items.length} ASSETS
+            {items.length} {t("ASSETS")}
           </span>
         }
       />

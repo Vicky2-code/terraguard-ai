@@ -10,6 +10,7 @@ import {
 import { useApi } from "../hooks/useApi";
 import { useLive } from "../hooks/useLive";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { RiskMapResponse, SoilMoistureResponse } from "../lib/types";
 import { useState } from "react";
 
@@ -22,6 +23,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function SoilMoisture() {
+  const t = useT();
   const { version } = useLive();
   const [locationId, setLocationId] = useState("");
 
@@ -36,7 +38,7 @@ export default function SoilMoisture() {
   const s = soil.data;
   const isDemo = s?.meta.source_status === "DEMO";
   const trend = s?.trend ?? [];
-  const maxTrend = Math.max(1, ...trend.map((t) => t.moisture));
+  const maxTrend = Math.max(1, ...trend.map((pt) => pt.moisture));
 
   return (
     <div>
@@ -48,9 +50,9 @@ export default function SoilMoisture() {
             className={inputCls + " w-56"}
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
-            aria-label="Select location"
+            aria-label={t("Select location")}
           >
-            <option value="">DEFAULT LOCATION (API CHOICE)</option>
+            <option value="">{t("DEFAULT LOCATION (API CHOICE)")}</option>
             {(locations.data?.features ?? []).map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name} ({f.state})
@@ -63,16 +65,14 @@ export default function SoilMoisture() {
       {isDemo && (
         <div className="mb-4">
           <Notice tone="purple" title="DEMO DATA">
-            The configured soil-moisture provider returned no live reading. The values below are
-            deterministic demo values — do not treat them as field measurements.
+            {t("The configured soil-moisture provider returned no live reading. The values below are deterministic demo values — do not treat them as field measurements.")}
           </Notice>
         </div>
       )}
       {s?.meta.source_status === "UNAVAILABLE" && (
         <div className="mb-4">
           <Notice tone="red" title="SOIL DATA SOURCE UNAVAILABLE">
-            Provider unreachable and no cached reading exists. Nothing is displayed rather than
-            inventing values.
+            {t("Provider unreachable and no cached reading exists. Nothing is displayed rather than inventing values.")}
           </Notice>
         </div>
       )}
@@ -118,13 +118,13 @@ export default function SoilMoisture() {
                     />
                   </div>
                   <div className="text-[9px] font-mono text-slate-600 mt-0.5">
-                    SATURATION {layer.saturation_pct}%
+                    {t("SATURATION")} {layer.saturation_pct}%
                   </div>
                 </div>
               ))}
             </div>
           </DataState>
-          <SourceStrip meta={s?.meta ?? null} extra={isDemo ? <span className="text-purple-400 font-bold">DEMO DATA</span> : undefined} />
+          <SourceStrip meta={s?.meta ?? null} extra={isDemo ? <span className="text-purple-400 font-bold">{t("DEMO DATA")}</span> : undefined} />
         </Panel>
 
         <Panel className="lg:col-span-2" title="MOISTURE TREND" icon={<Droplets className="w-3.5 h-3.5" />}>
@@ -137,19 +137,19 @@ export default function SoilMoisture() {
             emptyLabel="NO TREND SERIES"
           >
             <div className="h-56 flex items-end gap-1 pt-3">
-              {trend.map((t, i) => (
+              {trend.map((pt, i) => (
                 <div
                   key={i}
                   className="flex-1 min-w-0 group relative"
-                  style={{ height: `${Math.max(4, (t.moisture / maxTrend) * 100)}%` }}
+                  style={{ height: `${Math.max(4, (pt.moisture / maxTrend) * 100)}%` }}
                 >
                   <div
                     className={`w-full h-full rounded-t ${
-                      t.moisture >= 85 ? "bg-red-500/70" : t.moisture >= 60 ? "bg-orange-500/70" : "bg-emerald-600/70"
+                      pt.moisture >= 85 ? "bg-red-500/70" : pt.moisture >= 60 ? "bg-orange-500/70" : "bg-emerald-600/70"
                     } group-hover:opacity-80 transition-opacity`}
                   />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-panel border border-line rounded px-1.5 py-1 text-[9px] font-mono text-slate-200 whitespace-nowrap z-10">
-                    {t.moisture}% · {new Date(t.time).toLocaleDateString("en-GB", { day: "2-digit", month: "short", timeZone: "Asia/Kolkata" })}
+                    {pt.moisture}% · {new Date(pt.time).toLocaleDateString("en-GB", { day: "2-digit", month: "short", timeZone: "Asia/Kolkata" })}
                   </div>
                 </div>
               ))}

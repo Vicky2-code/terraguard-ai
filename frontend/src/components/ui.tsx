@@ -25,6 +25,7 @@ export function Panel({
   bodyClassName?: string;
   accent?: string;
 }) {
+  const t = useT();
   return (
     <section
       className={`rounded-lg border border-line bg-panel/80 backdrop-blur-sm overflow-hidden ${className}`}
@@ -37,7 +38,7 @@ export function Panel({
               className="text-[11px] font-mono font-bold uppercase tracking-[0.14em] text-slate-400 truncate"
               style={accent ? { color: accent } : undefined}
             >
-              {title}
+              {typeof title === "string" ? t(title) : title}
             </h2>
           </div>
           {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
@@ -99,26 +100,27 @@ export function KpiCard({
   pulse?: boolean;
   loading?: boolean;
 }) {
-  const t = TONES[tone];
+  const tones = TONES[tone];
+  const t = useT();
   return (
     <div
-      className={`p-3 rounded-lg border backdrop-blur flex flex-col justify-between transition-all hover:translate-y-[-2px] ${t.box}`}
+      className={`p-3 rounded-lg border backdrop-blur flex flex-col justify-between transition-all hover:translate-y-[-2px] ${tones.box}`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase truncate">
           {label}
         </span>
-        {icon && <span className={`${t.icon} shrink-0 ${pulse ? "animate-pulse" : ""}`}>{icon}</span>}
+        {icon && <span className={`${tones.icon} shrink-0 ${pulse ? "animate-pulse" : ""}`}>{icon}</span>}
       </div>
       <div className="my-1.5">
         {loading ? (
           <div className="skeleton h-8 w-20" />
         ) : (
-          <div className={`text-2xl font-black font-mono tracking-tight ${t.value}`}>{value}</div>
+          <div className={`text-2xl font-black font-mono tracking-tight ${tones.value}`}>{value}</div>
         )}
       </div>
       <div className="text-[10px] font-mono text-slate-400 truncate">
-        {loading ? <span className="text-slate-500">FETCHING FROM API…</span> : sub}
+        {loading ? <span className="text-slate-500">{t("FETCHING FROM API…")}</span> : sub}
       </div>
     </div>
   );
@@ -164,7 +166,7 @@ export function EmptyBlock({ label = "NO RECORDS FOUND", hint }: { label?: strin
   return (
     <div className="flex flex-col items-center justify-center gap-1.5 py-8 text-center">
       <div className="text-[11px] font-mono tracking-widest text-slate-500">{t(label)}</div>
-      {hint && <div className="text-[11px] text-slate-600">{hint}</div>}
+      {hint && <div className="text-[11px] text-slate-600">{t(hint)}</div>}
     </div>
   );
 }
@@ -223,11 +225,12 @@ export function StatusPill({
 }) {
   const key = status?.toUpperCase() ?? "";
   const style = STATUS_STYLE[key] ?? "text-slate-400 border-slate-600/60";
+  const t = useT();
   return (
     <span
       className={`px-1.5 py-[1px] rounded border text-[9px] font-mono font-bold tracking-wider ${style} ${className}`}
     >
-      {key}
+      {t(key)}
     </span>
   );
 }
@@ -283,6 +286,7 @@ const RISK_COLORS: Record<string, string> = {
 };
 
 export function RiskBadge({ level, score }: { level: string; score?: number }) {
+  const t = useT();
   const key = level?.toUpperCase() ?? "—";
   const style = RISK_COLORS[key] ?? "text-slate-400 border-slate-600";
   return (
@@ -290,7 +294,7 @@ export function RiskBadge({ level, score }: { level: string; score?: number }) {
       className={`inline-flex items-center gap-1 px-1.5 py-[1px] rounded border text-[9px] font-mono font-bold tracking-wider ${style}`}
     >
       {key === "CRITICAL" && <span className="w-1.5 h-1.5 rounded-full bg-red-400 blink" />}
-      {key}
+      {key === "—" ? key : t(key.replace("_", " "))}
       {score !== undefined && <span className="opacity-70">{score}</span>}
     </span>
   );
@@ -316,16 +320,17 @@ export function Field({
   hint?: string;
   error?: string;
 }) {
+  const t = useT();
   return (
     <label className="block space-y-1">
       <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-        {label}
+        {t(label)}
       </span>
       {children}
       {error ? (
-        <span className="block text-[10px] font-mono text-red-400">{error}</span>
+        <span className="block text-[10px] font-mono text-red-400">{t(error)}</span>
       ) : hint ? (
-        <span className="block text-[10px] text-slate-600">{hint}</span>
+        <span className="block text-[10px] text-slate-600">{t(hint)}</span>
       ) : null}
     </label>
   );
@@ -367,7 +372,7 @@ export function PageHeader({
           {badge}
         </div>
         {subtitle && (
-          <p className="text-[11px] text-slate-500 font-mono tracking-wide pl-3.5">{subtitle}</p>
+          <p className="text-[11px] text-slate-500 font-mono tracking-wide pl-3.5">{t(subtitle)}</p>
         )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

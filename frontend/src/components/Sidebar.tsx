@@ -219,9 +219,9 @@ export function Sidebar({
         <button
           onClick={onToggle}
           className="hidden lg:flex items-center justify-center gap-1 py-2 border-t border-line2 text-[10px] font-mono text-slate-500 hover:text-emerald-400 hover:bg-slate-800/50 transition-colors sticky bottom-0 bg-panel2"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? t("Expand sidebar") : t("Collapse sidebar")}
         >
-          {collapsed ? "»" : "« COLLAPSE"}
+          {collapsed ? "»" : `« ${t("COLLAPSE")}`}
         </button>
       </aside>
     </>

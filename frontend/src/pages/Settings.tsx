@@ -14,6 +14,7 @@ import {
 import { useApi } from "../hooks/useApi";
 import { formatDateTime } from "../hooks/useClock";
 import { getJSON, postJSON, putJSON, setToken } from "../lib/api";
+import { LANGUAGES, useT } from "../lib/i18n";
 import type { LoginResponse, SettingsResponse, Thresholds } from "../lib/types";
 import type { ShellContext } from "../components/AppShell";
 
@@ -28,6 +29,7 @@ const NOTIF_KEYS = ["in_app_alerts", "email_digest", "sms_bridge", "shift_report
 
 export default function Settings() {
   const { user, setUser } = useOutletContext<ShellContext>();
+  const t = useT();
   const settings = useApi<SettingsResponse>(() => getJSON<SettingsResponse>("/api/settings"), []);
   const [form, setForm] = useState<SettingsResponse | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -50,16 +52,16 @@ export default function Settings() {
     setMsg(null);
     setErr(null);
     try {
-      const t = form.thresholds;
-      if (!(t.moderate < t.high && t.high < t.very_high && t.very_high < t.critical)) {
-        throw new Error("Thresholds must ascend: MODERATE < HIGH < VERY HIGH < CRITICAL");
+      const th = form.thresholds;
+      if (!(th.moderate < th.high && th.high < th.very_high && th.very_high < th.critical)) {
+        throw new Error(t("Thresholds must ascend: MODERATE < HIGH < VERY HIGH < CRITICAL"));
       }
-      if (t.moderate < 1 || t.critical > 100) throw new Error("Thresholds must be 1–100");
+      if (th.moderate < 1 || th.critical > 100) throw new Error(t("Thresholds must be 1–100"));
       const updated = await putJSON<SettingsResponse>("/api/settings", form);
       setForm(updated);
-      setMsg(`SAVED ${formatDateTime(updated.updated_at ?? new Date().toISOString())}`);
+      setMsg(`${t("SAVED")} ${formatDateTime(updated.updated_at ?? new Date().toISOString())}`);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "save failed");
+      setErr(e instanceof Error ? e.message : t("save failed"));
     } finally {
       setBusy(false);
     }
@@ -75,10 +77,10 @@ export default function Settings() {
       setToken(res.token);
       localStorage.setItem("tg_user", JSON.stringify(res.user));
       setUser(res.user);
-      setAuthMsg(`SIGNED IN AS ${res.user.name} (${res.user.role})`);
+      setAuthMsg(`${t("SIGNED IN AS")} ${res.user.name} (${res.user.role})`);
       setPassword("");
     } catch (e) {
-      setAuthErr(e instanceof Error ? e.message : "login failed");
+      setAuthErr(e instanceof Error ? e.message : t("login failed"));
     } finally {
       setAuthBusy(false);
     }
@@ -93,8 +95,7 @@ export default function Settings() {
       {!user && (
         <div className="mb-4">
           <Notice tone="green" title="PUBLIC READ, AUTHENTICATED WRITE">
-            Most pages work without signing in. Saving settings requires an ADMIN token — sign in
-            below (seeds are listed in the README).
+            {t("Most pages work without signing in. Saving settings requires an ADMIN token — sign in below (seeds are listed in the README).")}
           </Notice>
         </div>
       )}
@@ -111,7 +112,7 @@ export default function Settings() {
               </div>
               {BAND_LABELS.map((b) => (
                 <div key={b.key} className="rounded border border-line bg-panel2 px-2 py-1.5">
-                  <div className="text-[9px] font-mono text-slate-500 text-center">{b.label}</div>
+                  <div className="text-[9px] font-mono text-slate-500 text-center">{t(b.label)}</div>
                   <input
                     type="number"
                     min={1}
@@ -144,9 +145,11 @@ export default function Settings() {
                 value={form?.language ?? "en"}
                 onChange={(e) => setForm((f) => (f ? { ...f, language: e.target.value } : f))}
               >
-                <option value="en">English</option>
-                <option value="hi">Hindi</option>
-                <option value="as">Assamese</option>
+                {LANGUAGES.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.native}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="REFRESH INTERVAL (SECONDS)" hint="Controls polling cadence if SSE is down">
@@ -169,7 +172,7 @@ export default function Settings() {
               className={btnPrimary + " w-full"}
               title={!roleAdmin ? "Requires ADMIN sign-in" : "Save settings"}
             >
-              {busy ? "SAVING…" : roleAdmin ? "SAVE SETTINGS" : "SIGN IN AS ADMIN TO SAVE"}
+              {busy ? t("SAVING…") : roleAdmin ? t("SAVE SETTINGS") : t("SIGN IN AS ADMIN TO SAVE")}
             </button>
             {msg && (
               <div className="text-[10px] font-mono text-emerald-400 border border-emerald-800/60 bg-emerald-950/30 rounded px-2 py-1.5">
@@ -201,15 +204,14 @@ export default function Settings() {
         <Panel title="NOTIFICATIONS" icon={<SettingsIcon className="w-3.5 h-3.5" />}>
           <div className="space-y-2">
             <Notice tone="purple" title="NO REAL DELIVERY CLAIMED">
-              SMS / email / webhook switches configure intent only. This deployment has no provider
-              keys, so delivery_status stays SIMULATED_LOCAL and no message leaves the system.
+              {t("SMS / email / webhook switches configure intent only. This deployment has no provider keys, so delivery_status stays SIMULATED_LOCAL and no message leaves the system.")}
             </Notice>
             {NOTIF_KEYS.map((k) => (
               <label
                 key={k}
                 className="flex items-center justify-between rounded border border-line bg-panel2 px-2.5 py-2"
               >
-                <span className="text-[11px] font-mono text-slate-300 uppercase">{k.replace(/_/g, " ")}</span>
+                <span className="text-[11px] font-mono text-slate-300 uppercase">{t(k.replace(/_/g, " "))}</span>
                 <input
                   type="checkbox"
                   disabled={!form || !roleAdmin}
@@ -229,7 +231,7 @@ export default function Settings() {
               </label>
             ))}
             <div className="text-[10px] font-mono text-slate-600 border-t border-line pt-2">
-              ALERT THRESHOLDS ARE ALSO EDITABLE ON THE EARLY ALERTS PAGE.
+              {t("ALERT THRESHOLDS ARE ALSO EDITABLE ON THE EARLY ALERTS PAGE.")}
             </div>
           </div>
         </Panel>
@@ -239,31 +241,31 @@ export default function Settings() {
             <div className="space-y-3">
               <div className="rounded border border-line bg-panel2 p-3 space-y-1.5">
                 <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-slate-500">NAME</span>
+                  <span className="text-slate-500">{t("NAME")}</span>
                   <span className="text-slate-200">{user.name}</span>
                 </div>
                 <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-slate-500">EMAIL</span>
+                  <span className="text-slate-500">{t("EMAIL")}</span>
                   <span className="text-slate-200">{user.email}</span>
                 </div>
                 <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-slate-500">ROLE</span>
+                  <span className="text-slate-500">{t("ROLE")}</span>
                   <span className="text-emerald-400 font-bold">{user.role}</span>
                 </div>
               </div>
               <div className="text-[10px] font-mono text-slate-600">
-                JWT STORED IN localStorage UNDER tg_token AND ATTACHED TO WRITE REQUESTS.
+                {t("JWT STORED IN localStorage UNDER tg_token AND ATTACHED TO WRITE REQUESTS.")}
               </div>
               <button
                 onClick={() => {
                   setToken(null);
                   localStorage.removeItem("tg_user");
                   setUser(null);
-                  setAuthMsg("SIGNED OUT");
+                  setAuthMsg(t("SIGNED OUT"));
                 }}
                 className={btnGhost + " w-full"}
               >
-                Sign out
+                {t("Sign out")}
               </button>
             </div>
           ) : (
@@ -289,7 +291,7 @@ export default function Settings() {
                 />
               </Field>
               <button type="submit" disabled={authBusy} className={btnPrimary + " w-full"}>
-                <LogIn className="w-3.5 h-3.5" /> {authBusy ? "SIGNING IN…" : "SIGN IN"}
+                <LogIn className="w-3.5 h-3.5" /> {authBusy ? t("SIGNING IN…") : t("SIGN IN")}
               </button>
               {authMsg && (
                 <div className="text-[10px] font-mono text-emerald-400 border border-emerald-800/60 bg-emerald-950/30 rounded px-2 py-1.5">

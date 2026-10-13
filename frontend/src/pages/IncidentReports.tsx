@@ -10,10 +10,12 @@ import {
 } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { downloadFile, getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { IncidentList } from "../lib/types";
 import { Notice } from "../components/ui";
 
 export default function IncidentReports() {
+  const t = useT();
   const incidents = useApi<IncidentList>(() => getJSON<IncidentList>("/api/incidents"), [], {
     pollMs: 60000,
   });
@@ -65,9 +67,9 @@ export default function IncidentReports() {
             onChange={(e) => setTypeFilter(e.target.value)}
             aria-label="Filter by incident type"
           >
-            <option value="">ALL TYPES</option>
-            {types.map((t) => (
-              <option key={t}>{t}</option>
+            <option value="">{t("ALL TYPES")}</option>
+            {types.map((ty) => (
+              <option key={ty}>{ty}</option>
             ))}
           </select>
         }
@@ -80,37 +82,37 @@ export default function IncidentReports() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 my-4">
         <KpiCard
-          label="TOTAL INCIDENTS"
+          label={t("TOTAL INCIDENTS")}
           tone="green"
           icon={<FileBarChart className="w-4 h-4" />}
           loading={incidents.loading}
           value={incidents.error ? "—" : String(incidents.data?.total ?? items.length)}
-          sub="POSTGRESQL REGISTER"
+          sub={t("POSTGRESQL REGISTER")}
         />
         <KpiCard
-          label="OPEN"
+          label={t("OPEN")}
           tone="red"
           pulse={open > 0}
           icon={<FileBarChart className="w-4 h-4" />}
           loading={incidents.loading}
           value={incidents.error ? "—" : String(open)}
-          sub="AWAITING RESPONSE"
+          sub={t("AWAITING RESPONSE")}
         />
         <KpiCard
-          label="CRITICAL SEVERITY"
+          label={t("CRITICAL SEVERITY")}
           tone="purple"
           icon={<FileBarChart className="w-4 h-4" />}
           loading={incidents.loading}
           value={incidents.error ? "—" : String(critical)}
-          sub="SEVERITY = CRITICAL"
+          sub={t("SEVERITY = CRITICAL")}
         />
         <KpiCard
-          label="CLOSURE RATE"
+          label={t("CLOSURE RATE")}
           tone="green"
           icon={<FileBarChart className="w-4 h-4" />}
           loading={incidents.loading}
           value={incidents.error || closureRate === null ? "—" : `${closureRate}%`}
-          sub="RESOLVED + CLOSED"
+          sub={t("RESOLVED + CLOSED")}
         />
       </div>
 
@@ -199,12 +201,12 @@ export default function IncidentReports() {
             <table className="w-full text-[11px] font-mono">
               <thead className="sticky top-0 bg-panel">
                 <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">
-                  <th className="px-3 py-2">ID</th>
-                  <th className="px-3 py-2">Type</th>
-                  <th className="px-3 py-2">Location</th>
-                  <th className="px-3 py-2">Severity</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2 hidden md:table-cell">Region</th>
+                  <th className="px-3 py-2">{t("ID")}</th>
+                  <th className="px-3 py-2">{t("Type")}</th>
+                  <th className="px-3 py-2">{t("Location")}</th>
+                  <th className="px-3 py-2">{t("Severity")}</th>
+                  <th className="px-3 py-2">{t("Status")}</th>
+                  <th className="px-3 py-2 hidden md:table-cell">{t("Region")}</th>
                 </tr>
               </thead>
               <tbody>

@@ -12,9 +12,11 @@ import {
 import { useApi } from "../hooks/useApi";
 import { useLive } from "../hooks/useLive";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { RiskMapResponse, WeatherHistory, WeatherReading } from "../lib/types";
 
 export default function WeatherRadar() {
+  const t = useT();
   const { version } = useLive();
   const [locationId, setLocationId] = useState<string>("");
 
@@ -46,9 +48,9 @@ export default function WeatherRadar() {
             className={inputCls + " w-56"}
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
-            aria-label="Select location"
+            aria-label={t("Select location")}
           >
-            <option value="">DEFAULT LOCATION (API CHOICE)</option>
+            <option value="">{t("DEFAULT LOCATION (API CHOICE)")}</option>
             {(locations.data?.features ?? []).map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name} ({f.state})
@@ -61,23 +63,22 @@ export default function WeatherRadar() {
       {weather.data?.meta.source_status === "UNAVAILABLE" && (
         <div className="mb-4">
           <Notice tone="red" title="WEATHER DATA SOURCE UNAVAILABLE">
-            The upstream provider could not be reached. Values below are last-known and marked
-            STALE — they are not live observations.
+            {t("The upstream provider could not be reached. Values below are last-known and marked STALE — they are not live observations.")}
           </Notice>
         </div>
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
         <KpiCard
-          label="TEMPERATURE"
+          label={t("TEMPERATURE")}
           tone="orange"
           icon={<Gauge className="w-4 h-4" />}
           loading={weather.loading}
           value={w ? `${w.temperature_c}°C` : "—"}
-          sub={w ? `OBSERVED ${w.meta.source_status}` : "NO DATA"}
+          sub={w ? `${t("OBSERVED")} ${w.meta.source_status}` : t("NO DATA")}
         />
         <KpiCard
-          label="HUMIDITY"
+          label={t("HUMIDITY")}
           tone="green"
           icon={<CloudRain className="w-4 h-4" />}
           loading={weather.loading}
@@ -85,29 +86,29 @@ export default function WeatherRadar() {
           sub={w?.location_name ?? "—"}
         />
         <KpiCard
-          label="WIND"
+          label={t("WIND")}
           tone="purple"
           icon={<Wind className="w-4 h-4" />}
           loading={weather.loading}
           value={w ? `${w.wind_kmh} km/h` : "—"}
-          sub={w ? "SURFACE WIND" : "NO DATA"}
+          sub={w ? t("SURFACE WIND") : t("NO DATA")}
         />
         <KpiCard
-          label="RAINFALL 24H"
+          label={t("RAINFALL 24H")}
           tone="red"
           pulse={(w?.rainfall_mm_24h ?? 0) >= 60}
           icon={<CloudRain className="w-4 h-4" />}
           loading={weather.loading}
           value={w ? `${w.rainfall_mm_24h} mm` : "—"}
-          sub={w ? `1H ${w.rainfall_mm_1h} · 6H ${w.rainfall_mm_6h}` : "NO DATA"}
+          sub={w ? `1H ${w.rainfall_mm_1h} · 6H ${w.rainfall_mm_6h}` : t("NO DATA")}
         />
         <KpiCard
-          label="FORECAST 24H"
+          label={t("FORECAST 24H")}
           tone="green"
           icon={<Radar className="w-4 h-4" />}
           loading={weather.loading}
           value={w && w.forecast_24h_mm != null ? `${w.forecast_24h_mm} mm` : "—"}
-          sub={w ? "OPEN-METEO MODEL" : "NO DATA"}
+          sub={w ? t("OPEN-METEO MODEL") : t("NO DATA")}
         />
       </div>
 
@@ -137,7 +138,7 @@ export default function WeatherRadar() {
             </div>
             <div className="flex justify-between mt-1.5 text-[9px] font-mono text-slate-600">
               <span>{series[0] ? new Date(series[0].time).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }) : "—24h"}</span>
-              <span>NOW</span>
+              <span>{t("NOW")}</span>
             </div>
           </DataState>
           <SourceStrip meta={history.data?.meta ?? weather.data?.meta ?? null} />
@@ -147,11 +148,10 @@ export default function WeatherRadar() {
           <div className="rounded border border-line bg-panel2 flex flex-col items-center justify-center gap-3 h-44 text-center px-4">
             <Radar className="w-6 h-6 text-slate-600" />
             <div className="text-[11px] font-mono font-bold tracking-widest text-slate-400">
-              RADAR DATA UNAVAILABLE
+              {t("RADAR DATA UNAVAILABLE")}
             </div>
             <div className="text-[10px] text-slate-600 leading-relaxed">
-              No radar tile provider is configured for this deployment. Rainfall values on this page
-              come from the server-side weather provider chain instead.
+              {t("No radar tile provider is configured for this deployment. Rainfall values on this page come from the server-side weather provider chain instead.")}
             </div>
           </div>
           <SourceStrip

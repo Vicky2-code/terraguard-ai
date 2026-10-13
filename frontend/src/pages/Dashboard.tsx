@@ -26,6 +26,7 @@ import { useApi } from "../hooks/useApi";
 import { useLive } from "../hooks/useLive";
 import { formatTime, timeAgo } from "../hooks/useClock";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type {
   AlertList,
   Corridor,
@@ -95,6 +96,7 @@ const SEV_TONE: Record<string, string> = {
 export default function Dashboard() {
   const { scenario } = useOutletContext<ShellContext>();
   const { version } = useLive();
+  const t = useT();
 
   const dash = useApi<DashboardResponse>(
     () => getJSON<DashboardResponse>("/api/dashboard"),
@@ -154,14 +156,14 @@ export default function Dashboard() {
           return (
             <Link key={def.key} to={def.to} className="block">
               <KpiCard
-                label={def.label}
+                label={t(def.label)}
                 tone={def.tone}
                 pulse={def.pulse && !unavailable}
                 loading={dash.loading}
                 icon={def.icon}
                 value={
                   unavailable ? (
-                    <span className="text-sm font-bold text-slate-500">DATA UNAVAILABLE</span>
+                    <span className="text-sm font-bold text-slate-500">{t("DATA UNAVAILABLE")}</span>
                   ) : (
                     (def.key === "population_at_risk"
                       ? (kpi!.value ?? 0).toLocaleString("en-IN")
@@ -170,7 +172,7 @@ export default function Dashboard() {
                 }
                 sub={
                   unavailable
-                    ? (kpi?.status ?? "NO DATA FROM API")
+                    ? t(kpi?.status ?? "NO DATA FROM API")
                     : (kpi?.source ?? kpi?.status ?? "") +
                       (kpi?.updated_at ? ` · ${timeAgo(kpi.updated_at)} ago` : "")
                 }
@@ -183,46 +185,46 @@ export default function Dashboard() {
       {/* blocked roads strip (corridors from API) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <KpiCard
-          label="BLOCKED CORRIDORS"
+          label={t("BLOCKED CORRIDORS")}
           tone="red"
           loading={corridors.loading}
           icon={<RouteIcon className="w-4 h-4" />}
-          value={corridors.error ? "UNAVAILABLE" : String(blockedRoads)}
+          value={corridors.error ? t("UNAVAILABLE") : String(blockedRoads)}
           sub={
             corridors.error
-              ? "/api/corridors UNREACHABLE"
-              : `OF ${(corridors.data ?? []).length} MONITORED (DEMO REFERENCE)`
+              ? t("/api/corridors UNREACHABLE")
+              : `${t("OF")} ${(corridors.data ?? []).length} ${t("MONITORED (DEMO REFERENCE)")}`
           }
         />
         <KpiCard
-          label="OPEN ALERTS (API)"
+          label={t("OPEN ALERTS (API)")}
           tone="amber"
           loading={alerts.loading}
           icon={<AlertTriangle className="w-4 h-4" />}
-          value={alerts.error ? "UNAVAILABLE" : String(alerts.data?.items.length ?? 0)}
-          sub={alerts.error ? "/api/alerts UNREACHABLE" : "DEDUPED PER LOCATION+LEVEL"}
+          value={alerts.error ? t("UNAVAILABLE") : String(alerts.data?.items.length ?? 0)}
+          sub={alerts.error ? t("/api/alerts UNREACHABLE") : t("DEDUPED PER LOCATION+LEVEL")}
         />
         <KpiCard
-          label="REPORTED INCIDENTS"
+          label={t("REPORTED INCIDENTS")}
           tone="purple"
           loading={incidents.loading}
           icon={<Building2 className="w-4 h-4" />}
-          value={incidents.error ? "UNAVAILABLE" : String(incidents.data?.total ?? 0)}
-          sub={incidents.error ? "/api/incidents UNREACHABLE" : "POSTGRES PERSISTED"}
+          value={incidents.error ? t("UNAVAILABLE") : String(incidents.data?.total ?? 0)}
+          sub={incidents.error ? t("/api/incidents UNREACHABLE") : t("POSTGRES PERSISTED")}
         />
         <KpiCard
-          label="RAIN SIGNAL"
+          label={t("RAIN SIGNAL")}
           tone="green"
           loading={map.loading}
           icon={<CloudRain className="w-4 h-4" />}
           value={
             map.error
-              ? "UNAVAILABLE"
+              ? t("UNAVAILABLE")
               : String(
                   (map.data?.features ?? []).filter((f) => (f.rainfall_mm_24h ?? 0) >= 60).length,
                 )
           }
-          sub="ZONES ≥60mm / 24H FROM API"
+          sub={t("ZONES ≥60mm / 24H FROM API")}
         />
       </div>
 
@@ -238,7 +240,7 @@ export default function Dashboard() {
                 to="/gis-monitor"
                 className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
               >
-                Full monitor <ArrowRight className="w-3 h-3" />
+                {t("Full monitor")} <ArrowRight className="w-3 h-3" />
               </Link>
             }
           >
@@ -272,7 +274,7 @@ export default function Dashboard() {
                 to="/early-alerts"
                 className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
               >
-                All
+                {t("All")}
               </Link>
             }
             bodyClassName="p-0"
@@ -372,11 +374,11 @@ export default function Dashboard() {
             <table className="w-full text-[11px] font-mono">
               <thead>
                 <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">
-                  <th className="px-3 py-2">Priority</th>
-                  <th className="px-3 py-2">Location</th>
-                  <th className="px-3 py-2">Risk</th>
-                  <th className="px-3 py-2 hidden sm:table-cell">Population</th>
-                  <th className="px-3 py-2 hidden md:table-cell">Reason</th>
+                  <th className="px-3 py-2">{t("Priority")}</th>
+                  <th className="px-3 py-2">{t("Location")}</th>
+                  <th className="px-3 py-2">{t("Risk")}</th>
+                  <th className="px-3 py-2 hidden sm:table-cell">{t("Population")}</th>
+                  <th className="px-3 py-2 hidden md:table-cell">{t("Reason")}</th>
                 </tr>
               </thead>
               <tbody>

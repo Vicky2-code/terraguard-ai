@@ -22,6 +22,7 @@ import {
 } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { AnalyticsResponse, RiskMapResponse } from "../lib/types";
 
 const RANGES = ["24h", "7d", "30d"] as const;
@@ -38,6 +39,7 @@ const TOOLTIP_STYLE = {
 };
 
 export default function RiskAnalytics() {
+  const t = useT();
   const [range, setRange] = useState<(typeof RANGES)[number]>("7d");
   const analytics = useApi<AnalyticsResponse>(
     () => getJSON<AnalyticsResponse>(`/api/analytics?range=${range}`),
@@ -91,7 +93,7 @@ export default function RiskAnalytics() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
         <KpiCard
-          label="AVG RESPONSE"
+          label={t("AVG RESPONSE")}
           tone="green"
           icon={<BarChart3 className="w-4 h-4" />}
           loading={analytics.loading}
@@ -102,10 +104,10 @@ export default function RiskAnalytics() {
               `${a.kpis.avg_response_minutes}m`
             )
           }
-          sub="MINUTES — NOT TRACKED" 
+          sub={t("MINUTES — NOT TRACKED")} 
         />
         <KpiCard
-          label="ALERT RESPONSE"
+          label={t("ALERT RESPONSE")}
           tone="green"
           icon={<BarChart3 className="w-4 h-4" />}
           loading={analytics.loading}
@@ -116,32 +118,32 @@ export default function RiskAnalytics() {
               `${a.kpis.alert_response_minutes}m`
             )
           }
-          sub="MINUTES"
+          sub={t("MINUTES")}
         />
         <KpiCard
-          label="ACTIVE ALERTS"
+          label={t("ACTIVE ALERTS")}
           tone="red"
           pulse
           icon={<BarChart3 className="w-4 h-4" />}
           loading={analytics.loading}
           value={a?.kpis.active_alerts ?? "—"}
-          sub={`RANGE ${range.toUpperCase()}`}
+          sub={`${t("RANGE")} ${range.toUpperCase()}`}
         />
         <KpiCard
-          label="INCIDENTS"
+          label={t("INCIDENTS")}
           tone="orange"
           icon={<BarChart3 className="w-4 h-4" />}
           loading={analytics.loading}
           value={a?.kpis.incidents ?? "—"}
-          sub={`RANGE ${range.toUpperCase()}`}
+          sub={`${t("RANGE")} ${range.toUpperCase()}`}
         />
         <KpiCard
-          label="RISK REGIONS"
+          label={t("RISK REGIONS")}
           tone="purple"
           icon={<BarChart3 className="w-4 h-4" />}
           loading={analytics.loading}
           value={a?.kpis.risk_regions ?? "—"}
-          sub="REGIONS ELEVATED"
+          sub={t("REGIONS ELEVATED")}
         />
       </div>
 
@@ -161,7 +163,7 @@ export default function RiskAnalytics() {
                 <XAxis dataKey="region" {...AXIS} interval={0} angle={-25} textAnchor="end" height={55} />
                 <YAxis {...AXIS} domain={[0, 100]} />
                 <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
-                <Bar dataKey="risk_score" name="Risk score">
+                <Bar dataKey="risk_score" name={t("Risk score")}>
                   {(a?.regional_risk ?? []).map((r) => (
                     <Cell
                       key={r.region}
@@ -201,7 +203,7 @@ export default function RiskAnalytics() {
                 <YAxis {...AXIS} allowDecimals={false} />
                 <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
                 <Legend wrapperStyle={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }} />
-                <Bar dataKey="count" name="Incidents" fill="#34d399" />
+                <Bar dataKey="count" name={t("Incidents")} fill="#34d399" />
               </BarChart>
             </ResponsiveContainer>
           </DataState>
@@ -226,7 +228,7 @@ export default function RiskAnalytics() {
                 <Line
                   type="monotone"
                   dataKey="count"
-                  name="Alerts"
+                  name={t("Alerts")}
                   stroke="#f97316"
                   strokeWidth={2}
                   dot={{ r: 2, fill: "#f97316" }}
@@ -252,7 +254,7 @@ export default function RiskAnalytics() {
                 <XAxis dataKey="band" {...AXIS} />
                 <YAxis {...AXIS} allowDecimals={false} />
                 <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
-                <Bar dataKey="count" name="Locations">
+                <Bar dataKey="count" name={t("Locations")}>
                   {buckets.map((_, i) => (
                     <Cell
                       key={i}

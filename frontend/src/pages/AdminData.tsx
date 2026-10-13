@@ -9,6 +9,7 @@ import {
 } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type {
   AlertList,
   IncidentList,
@@ -24,6 +25,7 @@ interface AdminStats {
 }
 
 export default function AdminData() {
+  const t = useT();
   const locations = useApi<RiskMapResponse>(() => getJSON<RiskMapResponse>("/api/risk-map"), []);
   const incidents = useApi<IncidentList>(() => getJSON<IncidentList>("/api/incidents"), [], {
     pollMs: 60000,
@@ -63,42 +65,41 @@ export default function AdminData() {
     <div>
       <PageHeader title="Admin / Data" subtitle="TABLE INVENTORY, DATABASE AND SEED STATUS" />
       <Notice tone="green" title="READ-ONLY ADMIN VIEW">
-        Record counts are read live from API endpoints. Destructive admin operations are not exposed
-        from the UI — use the API directly with an ADMIN token if required.
+        {t("Record counts are read live from API endpoints. Destructive admin operations are not exposed from the UI — use the API directly with an ADMIN token if required.")}
       </Notice>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 my-4">
         <KpiCard
-          label="LOCATIONS"
+          label={t("LOCATIONS")}
           tone="green"
           icon={<Table2 className="w-4 h-4" />}
           loading={locations.loading}
           value={locations.error ? "—" : String(tableCounts.locations)}
-          sub="/api/risk-map FEATURES"
+          sub={t("/api/risk-map FEATURES")}
         />
         <KpiCard
-          label="INCIDENTS"
+          label={t("INCIDENTS")}
           tone="orange"
           icon={<Table2 className="w-4 h-4" />}
           loading={incidents.loading}
           value={incidents.error ? "—" : String(tableCounts.incidents)}
-          sub="POSTGRESQL INCIDENTS TABLE"
+          sub={t("POSTGRESQL INCIDENTS TABLE")}
         />
         <KpiCard
-          label="ALERT RECORDS"
+          label={t("ALERT RECORDS")}
           tone="red"
           icon={<Table2 className="w-4 h-4" />}
           loading={alerts.loading}
           value={alerts.error ? "—" : String(tableCounts.alerts)}
-          sub="ALL STATUSES"
+          sub={t("ALL STATUSES")}
         />
         <KpiCard
-          label="API ENDPOINTS"
+          label={t("API ENDPOINTS")}
           tone="purple"
           icon={<Database className="w-4 h-4" />}
           loading={anyLoading}
           value={<span className="text-base">30+</span>}
-          sub="SEE docs/api-contract.md"
+          sub={t("SEE docs/api-contract.md")}
         />
       </div>
 
@@ -117,8 +118,8 @@ export default function AdminData() {
             <table className="w-full text-[11px] font-mono">
               <thead>
                 <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">
-                  <th className="px-3 py-2">Table</th>
-                  <th className="px-3 py-2 text-right">Rows</th>
+                  <th className="px-3 py-2">{t("Table")}</th>
+                  <th className="px-3 py-2 text-right">{t("Rows")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,29 +138,28 @@ export default function AdminData() {
         <Panel title="DATABASE" icon={<Database className="w-3.5 h-3.5" />}>
           <div className="space-y-2 text-[11px] font-mono">
             <div className="flex justify-between border-b border-line pb-1.5">
-              <span className="text-slate-500">ENGINE</span>
+              <span className="text-slate-500">{t("ENGINE")}</span>
               <span className="text-slate-200 text-right max-w-[60%] break-words">{engine}</span>
             </div>
             <div className="flex justify-between border-b border-line pb-1.5">
-              <span className="text-slate-500">MIGRATIONS</span>
-              <span className="text-emerald-400">SQLALCHEMY CREATE_ALL + ALEMBIC-READY</span>
+              <span className="text-slate-500">{t("MIGRATIONS")}</span>
+              <span className="text-emerald-400">{t("SQLALCHEMY CREATE_ALL + ALEMBIC-READY")}</span>
             </div>
             <div className="flex justify-between border-b border-line pb-1.5">
-              <span className="text-slate-500">SEED</span>
+              <span className="text-slate-500">{t("SEED")}</span>
               <span className="text-slate-200">
-                {seededAt ? new Date(seededAt).toLocaleString("en-GB", { timeZone: "Asia/Kolkata" }) : "IDEMPOTENT ON FIRST BOOT"}
+                {seededAt ? new Date(seededAt).toLocaleString("en-GB", { timeZone: "Asia/Kolkata" }) : t("IDEMPOTENT ON FIRST BOOT")}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">STORAGE</span>
+              <span className="text-slate-500">{t("STORAGE")}</span>
               <span className="text-slate-200 text-right max-w-[60%] break-words">
-                Browser localStorage IS NOT USED FOR DOMAIN DATA
+                {t("Browser localStorage IS NOT USED FOR DOMAIN DATA")}
               </span>
             </div>
           </div>
           <div className="mt-3 text-[10px] text-slate-600 leading-relaxed">
-            Incidents, alerts, thresholds, settings and scenario state all persist server-side and
-            survive browser restarts.
+            {t("Incidents, alerts, thresholds, settings and scenario state all persist server-side and survive browser restarts.")}
           </div>
           <SourceStrip meta={stats.data ? ({
             source: "/api/admin/stats + list endpoints",
@@ -184,15 +184,15 @@ export default function AdminData() {
                     row.err ? "text-red-400" : row.loading ? "text-amber-400" : "text-emerald-400"
                   }
                 >
-                  {row.err ? "ERROR" : row.loading ? "LOADING…" : "OK"}
+                  {row.err ? t("ERROR") : row.loading ? t("LOADING…") : t("OK")}
                 </span>
               </div>
             ))}
           </div>
           <div className="mt-3 text-[10px] text-slate-600 leading-relaxed">
             {stats.data === null &&
-              "GET /api/admin/stats is not implemented on this backend — shown as UNAVAILABLE rather than faked."}
-            {stats.data !== null && "Every count on this page traces back to a live API response."}
+              t("GET /api/admin/stats is not implemented on this backend — shown as UNAVAILABLE rather than faked.")}
+            {stats.data !== null && t("Every count on this page traces back to a live API response.")}
           </div>
         </Panel>
       </div>

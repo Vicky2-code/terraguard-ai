@@ -3,6 +3,7 @@ import { DataState, Notice, PageHeader, Panel, SourceStrip } from "../components
 import { useApi } from "../hooks/useApi";
 import { formatDateTime } from "../hooks/useClock";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { ModelInfo } from "../lib/types";
 
 const GOVERNANCE_CHECKS = [
@@ -50,6 +51,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function ModelGovernance() {
+  const t = useT();
   const models = useApi<{ models: ModelInfo[] } | ModelInfo[]>(
     () => getJSON<{ models: ModelInfo[] } | ModelInfo[]>("/api/models"),
     [],
@@ -62,8 +64,7 @@ export default function ModelGovernance() {
     <div>
       <PageHeader title="Model Governance" subtitle="REGISTRY, AUDIT STATUS AND HONEST LIMITATIONS" />
       <Notice tone="amber" title="PROTOTYPE DISCLOSURE">
-        TerraGuard runs a deterministic heuristic, not a validated ML model. Governance items that
-        would require real training/evaluation data are explicitly marked NOT AVAILABLE.
+        {t("TerraGuard runs a deterministic heuristic, not a validated ML model. Governance items that would require real training/evaluation data are explicitly marked NOT AVAILABLE.")}
       </Notice>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
@@ -87,28 +88,28 @@ export default function ModelGovernance() {
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-y-0.5 text-[10px] font-mono">
-                    <span className="text-slate-500">VERSION</span>
+                    <span className="text-slate-500">{t("VERSION")}</span>
                     <span className="text-right text-slate-200">{m.version}</span>
-                    <span className="text-slate-500">TYPE</span>
+                    <span className="text-slate-500">{t("TYPE")}</span>
                     <span className="text-right text-slate-200">{m.model_type}</span>
-                    <span className="text-slate-500">TRAINED AT</span>
+                    <span className="text-slate-500">{t("TRAINED AT")}</span>
                     <span className={`text-right ${m.trained_at ? "text-slate-200" : "text-red-400"}`}>
-                      {m.trained_at ? formatDateTime(m.trained_at) : "NOT AVAILABLE"}
+                      {m.trained_at ? formatDateTime(m.trained_at) : t("NOT AVAILABLE")}
                     </span>
-                    <span className="text-slate-500">DATASET VERSION</span>
+                    <span className="text-slate-500">{t("DATASET VERSION")}</span>
                     <span className={`text-right ${m.dataset_version ? "text-slate-200" : "text-red-400"}`}>
-                      {m.dataset_version ?? "NOT AVAILABLE"}
+                      {m.dataset_version ?? t("NOT AVAILABLE")}
                     </span>
-                    <span className="text-slate-500">DEPLOYED AT</span>
+                    <span className="text-slate-500">{t("DEPLOYED AT")}</span>
                     <span className="text-right text-slate-200">
                       {m.deployed_at ? formatDateTime(m.deployed_at) : "—"}
                     </span>
-                    <span className="text-slate-500">DRIFT</span>
-                    <span className="text-right text-amber-400">{m.drift_status ?? "NOT MEASURED"}</span>
+                    <span className="text-slate-500">{t("DRIFT")}</span>
+                    <span className="text-right text-amber-400">{m.drift_status ?? t("NOT MEASURED")}</span>
                   </div>
                   <div className="border-t border-line pt-1.5">
                     <div className="text-[9px] font-mono font-bold uppercase text-slate-500 mb-1">
-                      Metrics
+                      {t("Metrics")}
                     </div>
                     {m.metrics ? (
                       <div className="grid grid-cols-3 gap-1">
@@ -123,7 +124,7 @@ export default function ModelGovernance() {
                       </div>
                     ) : (
                       <div className="text-[10px] font-mono text-red-400">
-                        NOT AVAILABLE — NO EVALUATION RUN
+                        {t("NOT AVAILABLE — NO EVALUATION RUN")}
                       </div>
                     )}
                   </div>
@@ -152,26 +153,26 @@ export default function ModelGovernance() {
           <table className="w-full text-[11px] font-mono">
             <thead>
               <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">
-                <th className="px-3 py-2">Control</th>
-                <th className="px-3 py-2 w-32">Status</th>
-                <th className="px-3 py-2 hidden md:table-cell">Evidence</th>
+                <th className="px-3 py-2">{t("Control")}</th>
+                <th className="px-3 py-2 w-32">{t("Status")}</th>
+                <th className="px-3 py-2 hidden md:table-cell">{t("Evidence")}</th>
               </tr>
             </thead>
             <tbody>
               {GOVERNANCE_CHECKS.map((g) => (
                 <tr key={g.check} className="border-b border-line/50 align-top">
-                  <td className="px-3 py-2.5 text-slate-200">{g.check}</td>
+                  <td className="px-3 py-2.5 text-slate-200">{t(g.check)}</td>
                   <td className="px-3 py-2.5">
                     <span
                       className={`px-1.5 py-[1px] rounded border text-[9px] font-bold ${
                         STATUS_TONE[g.status] ?? "text-slate-400 border-slate-600"
                       }`}
                     >
-                      {g.status}
+                      {t(g.status)}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-slate-500 hidden md:table-cell text-[10px] leading-relaxed">
-                    {g.detail}
+                    {t(g.detail)}
                   </td>
                 </tr>
               ))}

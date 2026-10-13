@@ -12,6 +12,7 @@ import { useApi } from "../hooks/useApi";
 import { useLive } from "../hooks/useLive";
 import { formatDateTime } from "../hooks/useClock";
 import { getJSON, patchJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { Incident, IncidentList } from "../lib/types";
 
 const SEV_TONE: Record<string, string> = {
@@ -34,6 +35,7 @@ const STATUS_OPTIONS = ["OPEN", "INVESTIGATING", "CONTAINED", "RESOLVED", "CLOSE
 
 export default function FieldIncidents() {
   const { version } = useLive();
+  const t = useT();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [severity, setSeverity] = useState("");
@@ -99,7 +101,7 @@ export default function FieldIncidents() {
         actions={
           <button onClick={incidents.refetch} className={btnGhost} disabled={incidents.refreshing}>
             <RefreshCw className={`w-3.5 h-3.5 ${incidents.refreshing ? "animate-spin" : ""}`} />
-            Refresh
+            {t("Refresh")}
           </button>
         }
       />
@@ -113,7 +115,7 @@ export default function FieldIncidents() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2">
           <input
             className={inputCls + " lg:col-span-2"}
-            placeholder="SEARCH ID / TYPE / LOCATION…"
+            placeholder={t("SEARCH ID / TYPE / LOCATION…")}
             value={q}
             onChange={(e) => {
               setQ(e.target.value);
@@ -121,19 +123,19 @@ export default function FieldIncidents() {
             }}
           />
           <select className={inputCls} value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="">ALL STATUS</option>
+            <option value="">{t("ALL STATUS")}</option>
             {STATUS_OPTIONS.map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
           <select className={inputCls} value={severity} onChange={(e) => setSeverity(e.target.value)}>
-            <option value="">ALL SEVERITY</option>
+            <option value="">{t("ALL SEVERITY")}</option>
             {["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
           <select className={inputCls} value={region} onChange={(e) => setRegion(e.target.value)}>
-            <option value="">ALL REGIONS</option>
+            <option value="">{t("ALL REGIONS")}</option>
             {[
               "Assam",
               "Arunachal Pradesh",
@@ -152,29 +154,29 @@ export default function FieldIncidents() {
             className={inputCls}
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            aria-label="From date"
+            aria-label={t("From date")}
           />
           <input
             type="date"
             className={inputCls}
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            aria-label="To date"
+            aria-label={t("To date")}
           />
         </div>
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-mono text-slate-600">
-            QUERY: {path} · REFRESHES WITH LIVE STREAM
+            {t("QUERY")}: {path} · {t("REFRESHES WITH LIVE STREAM")}
           </span>
           <button onClick={resetFilters} className={btnGhost + " !py-1"}>
-            Reset filters
+            {t("Reset filters")}
           </button>
         </div>
       </Panel>
 
       {patchErr && (
         <div className="mb-3 text-[11px] font-mono text-red-400 border border-red-800/60 bg-red-950/30 rounded px-2.5 py-2">
-          UPDATE FAILED: {patchErr}
+          {t("UPDATE FAILED")}: {patchErr}
         </div>
       )}
 
@@ -192,13 +194,13 @@ export default function FieldIncidents() {
             <table className="w-full text-[11px] font-mono">
               <thead>
                 <tr className="text-left text-[9px] uppercase tracking-widest text-slate-500 border-b border-line">
-                  <th className="px-3 py-2">ID</th>
-                  <th className="px-3 py-2">Type</th>
-                  <th className="px-3 py-2">Location</th>
-                  <th className="px-3 py-2">Severity</th>
-                  <th className="px-3 py-2 hidden md:table-cell">Reporter</th>
-                  <th className="px-3 py-2 hidden lg:table-cell">Created</th>
-                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2">{t("ID")}</th>
+                  <th className="px-3 py-2">{t("Type")}</th>
+                  <th className="px-3 py-2">{t("Location")}</th>
+                  <th className="px-3 py-2">{t("Severity")}</th>
+                  <th className="px-3 py-2 hidden md:table-cell">{t("Reporter")}</th>
+                  <th className="px-3 py-2 hidden lg:table-cell">{t("Created")}</th>
+                  <th className="px-3 py-2">{t("Status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -256,7 +258,7 @@ export default function FieldIncidents() {
           {pages > 1 && (
             <div className="flex items-center justify-between px-3 py-2 border-t border-line">
               <span className="text-[10px] font-mono text-slate-500">
-                PAGE {page} / {pages}
+                {t("PAGE")} {page} / {pages}
               </span>
               <div className="flex gap-1.5">
                 <button
@@ -264,14 +266,14 @@ export default function FieldIncidents() {
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
-                  Prev
+                  {t("Prev")}
                 </button>
                 <button
                   className={btnGhost + " !py-1"}
                   disabled={page >= pages}
                   onClick={() => setPage((p) => Math.min(pages, p + 1))}
                 >
-                  Next
+                  {t("Next")}
                 </button>
               </div>
             </div>
@@ -281,8 +283,8 @@ export default function FieldIncidents() {
       </Panel>
 
       <div className="mt-3 text-[10px] font-mono text-slate-600">
-        NOTE: STATUS CHANGES CALL PATCH /api/incidents/&#123;id&#125; AND PERSIST IN POSTGRESQL.
-        {version > 0 && " TABLE RE-SYNCS WITH THE LIVE STREAM."}
+        {t("NOTE: STATUS CHANGES CALL PATCH /api/incidents/{id} AND PERSIST IN POSTGRESQL.")}
+        {version > 0 && " " + t("TABLE RE-SYNCS WITH THE LIVE STREAM.")}
       </div>
     </div>
   );

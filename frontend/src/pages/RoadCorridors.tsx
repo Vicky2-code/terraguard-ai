@@ -3,6 +3,7 @@ import { DataState, Notice, PageHeader, Panel, RiskBadge, SourceStrip } from "..
 import { useApi } from "../hooks/useApi";
 import { formatDateTime } from "../hooks/useClock";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { Corridor } from "../lib/types";
 
 const STATUS_TONE: Record<string, string> = {
@@ -13,6 +14,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function RoadCorridors() {
+  const t = useT();
   const corridors = useApi<Corridor[]>(() => getJSON<Corridor[]>("/api/corridors"), [], {
     pollMs: 60000,
   });
@@ -26,15 +28,14 @@ export default function RoadCorridors() {
         subtitle="STRATEGIC ROUTE STATUS FOR RESPONSE LOGISTICS · /api/corridors"
         badge={
           <span className="px-2 py-[2px] rounded bg-red-600/80 text-white text-[10px] font-mono font-bold tabular-nums">
-            {corridors.error ? "—" : blocked} BLOCKED
+            {corridors.error ? "—" : blocked} {t("BLOCKED")}
           </span>
         }
       />
 
       <div className="mb-4">
         <Notice tone="amber" title="DEMO REFERENCE DATA">
-          Corridor records are seeded reference data for demonstration — they are not fed from a live
-          highway authority feed. Status changes are demo-scoped.
+          {t("Corridor records are seeded reference data for demonstration — they are not fed from a live highway authority feed. Status changes are demo-scoped.")}
         </Notice>
       </div>
 
@@ -76,11 +77,11 @@ export default function RoadCorridors() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
                   <div>
-                    <span className="text-slate-600">INCIDENTS </span>
+                    <span className="text-slate-600">{t("INCIDENTS")} </span>
                     <span className="text-slate-300">{c.incident_count}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-600">UPDATED </span>
+                    <span className="text-slate-600">{t("UPDATED")} </span>
                     <span className="text-slate-300">{formatDateTime(c.last_update)}</span>
                   </div>
                 </div>
@@ -91,7 +92,7 @@ export default function RoadCorridors() {
                 )}
                 {c.demo && (
                   <div className="text-[9px] font-mono text-purple-400/80 uppercase tracking-wider">
-                    Demo record
+                    {t("Demo record")}
                   </div>
                 )}
               </div>

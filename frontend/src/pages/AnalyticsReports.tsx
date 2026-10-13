@@ -20,6 +20,7 @@ import {
 } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { AnalyticsResponse, TemporalResponse } from "../lib/types";
 
 const RANGES = ["24h", "7d", "30d"] as const;
@@ -36,6 +37,7 @@ const TOOLTIP_STYLE = {
 
 /** Executive-style analytics report: KPI table + trend charts, one range switch. */
 export default function AnalyticsReports() {
+  const t = useT();
   const [range, setRange] = useState<(typeof RANGES)[number]>("7d");
 
   const analytics = useApi<AnalyticsResponse>(
@@ -50,7 +52,7 @@ export default function AnalyticsReports() {
   );
 
   const a = analytics.data;
-  const t = temporal.data;
+  const temporalData = temporal.data;
 
   const kpiRows: { label: string; value: string | number; unit?: string }[] = a
     ? [
@@ -67,7 +69,7 @@ export default function AnalyticsReports() {
     <div>
       <PageHeader
         title="Analytics Reports"
-        subtitle={`EXECUTIVE SUMMARY — RANGE ${range.toUpperCase()} · VALUES FROM /api/analytics + /api/temporal`}
+        subtitle={`${t("EXECUTIVE SUMMARY")} — ${t("RANGE")} ${range.toUpperCase()} · ${t("VALUES FROM /api/analytics + /api/temporal")}`}
         actions={
           <div className="flex rounded border border-line overflow-hidden">
             {RANGES.map((r) => (
@@ -99,7 +101,7 @@ export default function AnalyticsReports() {
               <tbody>
                 {kpiRows.map((row) => (
                   <tr key={row.label} className="border-b border-line/50">
-                    <td className="px-3 py-2.5 text-slate-400">{row.label}</td>
+                    <td className="px-3 py-2.5 text-slate-400">{t(row.label)}</td>
                     <td className="px-3 py-2.5 text-right">
                       <span
                         className={
@@ -108,7 +110,7 @@ export default function AnalyticsReports() {
                             : "text-slate-100 font-bold tabular-nums"
                         }
                       >
-                        {row.value}
+                        {row.value === "NOT AVAILABLE" ? t("NOT AVAILABLE") : row.value}
                       </span>
                       {row.unit && typeof row.value !== "string" && (
                         <span className="text-slate-600 ml-1">{row.unit}</span>
@@ -126,35 +128,35 @@ export default function AnalyticsReports() {
           <DataState
             loading={temporal.loading}
             error={temporal.error}
-            empty={!temporal.loading && (t?.risk.length ?? 0) === 0}
+            empty={!temporal.loading && (temporalData?.risk.length ?? 0) === 0}
             onRetry={temporal.refetch}
             loadingLabel="LOADING TREND…"
             emptyLabel="NO TREND DATA"
           >
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={t?.risk ?? []}>
+              <LineChart data={temporalData?.risk ?? []}>
                 <CartesianGrid {...GRID} />
                 <XAxis dataKey="time" {...AXIS} />
                 <YAxis {...AXIS} domain={[0, 100]} />
                 <Tooltip contentStyle={TOOLTIP_STYLE} />
-                <Line type="monotone" dataKey="value" name="Avg risk" stroke="#f97316" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="value" name={t("Avg risk")} stroke="#f97316" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={t?.rainfall ?? []}>
+              <BarChart data={temporalData?.rainfall ?? []}>
                 <CartesianGrid {...GRID} />
                 <XAxis dataKey="time" {...AXIS} />
                 <YAxis {...AXIS} allowDecimals={false} />
                 <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#1d4a3333" }} />
-                <Bar dataKey="value" name="Rainfall (mm)">
-                  {(t?.rainfall ?? []).map((_, i) => (
+                <Bar dataKey="value" name={t("Rainfall (mm)")}>
+                  {(temporalData?.rainfall ?? []).map((_, i) => (
                     <Cell key={i} fill="#34d399" />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </DataState>
-          <SourceStrip meta={t?.meta ?? a?.meta ?? null} />
+          <SourceStrip meta={temporalData?.meta ?? a?.meta ?? null} />
         </Panel>
       </div>
 

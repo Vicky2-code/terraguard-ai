@@ -3,6 +3,7 @@ import { btnGhost, DataState, PageHeader, Panel, SourceStrip, StatusPill } from 
 import { useApi } from "../hooks/useApi";
 import { formatDateTime, timeAgo } from "../hooks/useClock";
 import { getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { HealthResponse, PipelineResponse } from "../lib/types";
 
 const STATUS_TONE: Record<string, string> = {
@@ -28,6 +29,7 @@ const JOBS = [
 ];
 
 export default function DataPipeline() {
+  const t = useT();
   const pipeline = useApi<PipelineResponse>(() => getJSON<PipelineResponse>("/api/pipeline"), [], {
     pollMs: 30000,
   });
@@ -56,7 +58,7 @@ export default function DataPipeline() {
               <RefreshCw
                 className={`w-3.5 h-3.5 ${pipeline.refreshing || health.refreshing ? "animate-spin" : ""}`}
               />
-              Refresh
+              {t("Refresh")}
             </button>
           </div>
         }
@@ -83,14 +85,14 @@ export default function DataPipeline() {
                           : "text-slate-600 border-slate-700"
                       }`}
                     >
-                      {run ? run.status : "NO RUNS YET"}
+                      {run ? run.status : t("NO RUNS YET")}
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">{j.desc}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{t(j.desc)}</div>
                   {run && (
                     <div className="text-[9px] font-mono text-slate-600 mt-1">
-                      STARTED {formatDateTime(run.started_at)}
-                      {run.finished_at && ` → FINISHED ${formatDateTime(run.finished_at)}`}
+                      {t("STARTED")} {formatDateTime(run.started_at)}
+                      {run.finished_at && ` → ${t("FINISHED")} ${formatDateTime(run.finished_at)}`}
                       {run.message && ` · ${run.message}`}
                     </div>
                   )}
@@ -117,7 +119,7 @@ export default function DataPipeline() {
                     <div className="text-[11px] font-mono text-slate-200">{c.name}</div>
                     <div className="text-[10px] text-slate-500 truncate">{c.detail}</div>
                     <div className="text-[9px] font-mono text-slate-600">
-                      CHECKED {timeAgo(c.last_checked)} AGO
+                      {t("CHECKED")} {timeAgo(c.last_checked)} {t("AGO")}
                     </div>
                   </div>
                   <span
@@ -144,7 +146,7 @@ export default function DataPipeline() {
             emptyLabel="NO HEALTH DATA"
           >
             <div className="px-3 py-2 border-b border-line flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-400">OVERALL</span>
+              <span className="text-[11px] font-mono text-slate-400">{t("OVERALL")}</span>
               <span className="flex items-center gap-2">
                 <StatusPill status={h?.status === "healthy" ? "ONLINE" : "DEGRADED"} />
                 <span className="text-[10px] font-mono text-slate-500">v{h?.version ?? "—"}</span>

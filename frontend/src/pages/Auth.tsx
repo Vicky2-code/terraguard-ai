@@ -79,7 +79,7 @@ export function LoginPage() {
       }
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign-in failed");
+      setError(err instanceof Error ? err.message : t("Sign-in failed"));
     } finally {
       setBusy(false);
     }
@@ -213,7 +213,7 @@ export function RegisterPage() {
       }
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Account creation failed");
+      setError(err instanceof Error ? err.message : t("Account creation failed"));
     } finally {
       setBusy(false);
     }

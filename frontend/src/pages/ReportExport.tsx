@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, FileDown } from "lucide-react";
 import { btnPrimary, inputCls, Notice, PageHeader, Panel } from "../components/ui";
 import { downloadFile, getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { Meta } from "../lib/types";
 import { useApi } from "../hooks/useApi";
 
@@ -15,6 +16,7 @@ const DATASETS = [
 const FORMATS = ["csv", "json"] as const;
 
 export default function ReportExport() {
+  const t = useT();
   const [dataset, setDataset] = useState<string>("incidents");
   const [format, setFormat] = useState<(typeof FORMATS)[number]>("csv");
   const [from, setFrom] = useState("");
@@ -47,9 +49,9 @@ export default function ReportExport() {
       if (region) params.set("region", region);
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
       await downloadFile(`/api/export?${params.toString()}`, `terraguard-${dataset}-${stamp}.${format}`);
-      setMsg(`DOWNLOAD STARTED — terraguard-${dataset}.${format}`);
+      setMsg(`${t("DOWNLOAD STARTED")} — terraguard-${dataset}.${format}`);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "export failed");
+      setErr(e instanceof Error ? e.message : t("export failed"));
     } finally {
       setBusy(false);
     }
@@ -64,8 +66,7 @@ export default function ReportExport() {
         subtitle="REAL FILE DOWNLOADS FROM /api/export — CSV ROWS COME FROM POSTGRESQL, NOT THE BROWSER"
       />
       <Notice tone="green" title="HONEST EXPORT">
-        The CSV is streamed by FastAPI directly from database rows. If the API is unreachable the
-        download fails loudly instead of exporting stale client cache.
+        {t("The CSV is streamed by FastAPI directly from database rows. If the API is unreachable the download fails loudly instead of exporting stale client cache.")}
       </Notice>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
@@ -73,7 +74,7 @@ export default function ReportExport() {
           <div className="space-y-3">
             <div className="space-y-1">
               <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                Dataset
+                {t("Dataset")}
               </span>
               <div className="space-y-1">
                 {DATASETS.map((d) => (
@@ -92,7 +93,7 @@ export default function ReportExport() {
                       onChange={() => setDataset(d.key)}
                       className="accent-emerald-500"
                     />
-                    <span className="text-[11px] font-mono text-slate-300">{d.label}</span>
+                    <span className="text-[11px] font-mono text-slate-300">{t(d.label)}</span>
                   </label>
                 ))}
               </div>
@@ -100,7 +101,7 @@ export default function ReportExport() {
 
             <div className="space-y-1">
               <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                Format
+                {t("Format")}
               </span>
               <div className="flex gap-1.5">
                 {FORMATS.map((f) => (
@@ -122,7 +123,7 @@ export default function ReportExport() {
             <div className="grid grid-cols-2 gap-2">
               <label className="block space-y-1">
                 <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  From
+                  {t("From")}
                 </span>
                 <input
                   type="date"
@@ -133,7 +134,7 @@ export default function ReportExport() {
               </label>
               <label className="block space-y-1">
                 <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  To
+                  {t("To")}
                 </span>
                 <input
                   type="date"
@@ -146,10 +147,10 @@ export default function ReportExport() {
 
             <label className="block space-y-1">
               <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                Region (optional)
+                {t("Region (optional)")}
               </span>
               <select className={inputCls} value={region} onChange={(e) => setRegion(e.target.value)}>
-                <option value="">ALL REGIONS</option>
+                <option value="">{t("ALL REGIONS")}</option>
                 {[
                   "Assam",
                   "Arunachal Pradesh",
@@ -166,7 +167,7 @@ export default function ReportExport() {
             </label>
 
             <button onClick={() => void run()} disabled={busy} className={btnPrimary + " w-full"}>
-              <Download className="w-3.5 h-3.5" /> {busy ? "EXPORTING…" : `DOWNLOAD .${format}`}
+              <Download className="w-3.5 h-3.5" /> {busy ? t("EXPORTING…") : `${t("DOWNLOAD")} .${format}`}
             </button>
 
             {msg && (
@@ -176,7 +177,7 @@ export default function ReportExport() {
             )}
             {err && (
               <div className="text-[10px] font-mono text-red-400 border border-red-800/60 bg-red-950/30 rounded px-2 py-1.5 break-words">
-                EXPORT FAILED: {err}
+                {t("EXPORT FAILED")}: {err}
               </div>
             )}
           </div>
@@ -186,34 +187,34 @@ export default function ReportExport() {
           <div className="space-y-3">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="rounded border border-line bg-panel2 p-3">
-                <div className="text-[10px] font-mono text-slate-500 uppercase">Records</div>
+                <div className="text-[10px] font-mono text-slate-500 uppercase">{t("Records")}</div>
                 <div className="text-2xl font-black font-mono text-emerald-400 tabular-nums">
                   {counts.loading ? "…" : counts.error ? "—" : (count ?? "—")}
                 </div>
                 <div className="text-[9px] font-mono text-slate-600 truncate">
-                  VIA {activeDef.countPath}
+                  {t("VIA")} {activeDef.countPath}
                 </div>
               </div>
               <div className="rounded border border-line bg-panel2 p-3">
-                <div className="text-[10px] font-mono text-slate-500 uppercase">Format</div>
+                <div className="text-[10px] font-mono text-slate-500 uppercase">{t("Format")}</div>
                 <div className="text-2xl font-black font-mono text-purple-400 uppercase">
                   .{format}
                 </div>
-                <div className="text-[9px] font-mono text-slate-600">STREAMED BY FASTAPI</div>
+                <div className="text-[9px] font-mono text-slate-600">{t("STREAMED BY FASTAPI")}</div>
               </div>
               <div className="rounded border border-line bg-panel2 p-3">
-                <div className="text-[10px] font-mono text-slate-500 uppercase">Filter</div>
+                <div className="text-[10px] font-mono text-slate-500 uppercase">{t("Filter")}</div>
                 <div className="text-[11px] font-mono text-slate-300 leading-snug">
-                  {from || to ? `${from || "…"} → ${to || "…"}` : "ALL DATES"}
+                  {from || to ? `${from || "…"} → ${to || "…"}` : t("ALL DATES")}
                   <br />
-                  {region || "ALL REGIONS"}
+                  {region || t("ALL REGIONS")}
                 </div>
               </div>
             </div>
 
             <div className="rounded border border-line bg-ink p-3 text-[11px] font-mono text-slate-500 space-y-1">
               <div className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                Endpoint
+                {t("Endpoint")}
               </div>
               <div className="text-emerald-400 break-all">
                 GET /api/export?dataset={dataset}&amp;format={format}
@@ -228,14 +229,14 @@ export default function ReportExport() {
 
             {counts.error && (
               <div className="text-[11px] font-mono text-red-400 border border-red-800/60 bg-red-950/30 rounded px-2.5 py-2">
-                COUNT CHECK FAILED: {counts.error} — export will likely fail too.
+                {t("COUNT CHECK FAILED")}: {counts.error} — {t("export will likely fail too.")}
               </div>
             )}
           </div>
           <div className="mt-3 px-3 py-1.5 border-t border-line bg-panel2/60 text-[9px] font-mono text-slate-500 uppercase">
-            SOURCE: {activeDef.countPath} · STATUS:{" "}
+            {t("SOURCE")}: {activeDef.countPath} · {t("STATUS")}:{" "}
             <span className={counts.error ? "text-red-400" : "text-emerald-400"}>
-              {counts.error ? "UNAVAILABLE" : "LIVE"}
+              {counts.error ? t("UNAVAILABLE") : t("LIVE")}
             </span>
             {meta ? "" : ""}
           </div>

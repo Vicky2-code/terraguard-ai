@@ -24,8 +24,10 @@ import AdminData from "./pages/AdminData";
 import Settings from "./pages/Settings";
 import { LoginPage, RegisterPage } from "./pages/Auth";
 import { PageHeader, Panel } from "./components/ui";
+import { useT } from "./lib/i18n";
 
 function NotFound() {
+  const t = useT();
   return (
     <div>
       <PageHeader title="404 — Not Found" subtitle="THE REQUESTED MODULE DOES NOT EXIST" />
@@ -33,13 +35,13 @@ function NotFound() {
         <div className="py-8 text-center space-y-3">
           <div className="text-3xl font-black font-mono text-slate-600">404</div>
           <div className="text-[11px] font-mono text-slate-500">
-            Use the sidebar to navigate to a real module.
+            {t("Use the sidebar to navigate to a real module.")}
           </div>
           <a
             href="/dashboard"
             className="inline-flex px-3 py-1.5 rounded text-xs font-mono font-bold uppercase tracking-wider border border-emerald-700 text-emerald-300 hover:bg-emerald-900/40"
           >
-            Back to dashboard
+            {t("Back to dashboard")}
           </a>
         </div>
       </Panel>

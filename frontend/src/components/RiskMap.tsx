@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, ZoomControl } fr
 import type { LatLngExpression } from "leaflet";
 import { LocateFixed, RefreshCw } from "lucide-react";
 import type { LocationRec, RiskLevel } from "../lib/types";
+import { useT } from "../lib/i18n";
 import { btnGhost, RiskBadge } from "./ui";
 
 export const RISK_COLORS: Record<RiskLevel, string> = {
@@ -46,6 +47,7 @@ export function RiskMap({
   refreshing?: boolean;
   className?: string;
 }) {
+  const t = useT();
   const [levels, setLevels] = useState<Set<RiskLevel>>(new Set(LEVEL_ORDER));
   const [query, setQuery] = useState("");
   const [center, setCenter] = useState<LatLngExpression>(NE_CENTER);
@@ -99,7 +101,7 @@ export function RiskMap({
                 }
                 aria-pressed={active}
               >
-                {lvl.replace("_", " ")}
+                {t(lvl.replace("_", " "))}
               </button>
             );
           })}
@@ -107,17 +109,17 @@ export function RiskMap({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="FILTER LOCATION / STATE…"
+          placeholder={t("FILTER LOCATION / STATE…")}
           className="w-full sm:w-44 bg-panel2 border border-line rounded px-2 py-1 text-[10px] font-mono text-slate-200 placeholder:text-slate-600 focus:border-emerald-600 focus:outline-none"
         />
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-[9px] font-mono text-slate-500 tabular-nums">
-            {visible.length}/{features.length} MARKERS
+            {visible.length}/{features.length} {t("MARKERS")}
           </span>
           <button
             onClick={() => setCenter([26.2, 92.8])}
             className="p-1.5 rounded border border-slate-700/60 text-slate-400 hover:text-emerald-400 hover:bg-slate-800"
-            title="Recenter on Northeast India"
+            title={t("Recenter on Northeast India")}
           >
             <LocateFixed className="w-3.5 h-3.5" />
           </button>
@@ -126,7 +128,7 @@ export function RiskMap({
               onClick={onRefresh}
               disabled={refreshing}
               className="p-1.5 rounded border border-slate-700/60 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 disabled:opacity-50"
-              title="Reload markers from API"
+              title={t("Reload markers from API")}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
             </button>
@@ -173,7 +175,7 @@ export function RiskMap({
             >
               <Tooltip direction="top" offset={[0, -8]} className="tg-tooltip" permanent={false}>
                 <span className="font-bold" style={{ color }}>
-                  {f.risk_level.replace("_", " ")}
+                  {t(f.risk_level.replace("_", " "))}
                 </span>{" "}
                 · {f.name} · {f.risk_score}
               </Tooltip>
@@ -189,34 +191,34 @@ export function RiskMap({
                   </div>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-slate-400">
                     <span>
-                      POP <span className="text-slate-200">{f.population?.toLocaleString("en-IN")}</span>
+                      {t("POP")} <span className="text-slate-200">{f.population?.toLocaleString("en-IN")}</span>
                     </span>
                     <span>
-                      ELEV{" "}
+                      {t("ELEV")}{" "}
                       <span className="text-slate-200">
                         {f.elevation_m != null ? `${f.elevation_m}m` : "—"}
                       </span>
                     </span>
                     <span>
-                      RAIN24H{" "}
+                      {t("RAIN24H")}{" "}
                       <span className="text-slate-200">
                         {f.rainfall_mm_24h != null ? `${f.rainfall_mm_24h}mm` : "—"}
                       </span>
                     </span>
                     <span>
-                      SOIL{" "}
+                      {t("SOIL")}{" "}
                       <span className="text-slate-200">
                         {f.soil_moisture != null ? `${f.soil_moisture}%` : "—"}
                       </span>
                     </span>
                     <span>
-                      SLOPE{" "}
+                      {t("SLOPE")}{" "}
                       <span className="text-slate-200">
                         {f.slope_deg != null ? `${f.slope_deg}°` : "—"}
                       </span>
                     </span>
                     <span>
-                      ASSESSED{" "}
+                      {t("ASSESSED")}{" "}
                       <span className="text-slate-200">
                         {f.assessed_at
                           ? new Date(f.assessed_at).toLocaleString("en-GB", {
@@ -237,7 +239,7 @@ export function RiskMap({
         </MapContainer>
         {basemapDown && (
           <div className="absolute top-2 left-2 z-[1000] px-2 py-1 rounded border border-amber-700/70 bg-amber-950/90 text-[9px] font-mono text-amber-300 max-w-[320px]">
-            BASEMAP TILES UNAVAILABLE (OPENSTREETMAP UNREACHABLE) — RISK MARKERS ONLY
+            {t("BASEMAP TILES UNAVAILABLE (OPENSTREETMAP UNREACHABLE) — RISK MARKERS ONLY")}
           </div>
         )}
       </div>
@@ -245,7 +247,7 @@ export function RiskMap({
       {/* legend */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 border-t border-line bg-panel/80">
         <span className="text-[9px] font-mono font-bold tracking-widest text-slate-500 uppercase">
-          Risk legend
+          {t("Risk legend")}
         </span>
         {LEVEL_ORDER.map((lvl) => (
           <span key={lvl} className="flex items-center gap-1.5 text-[9px] font-mono text-slate-400">
@@ -253,14 +255,14 @@ export function RiskMap({
               className="w-2.5 h-2.5 rounded-full border"
               style={{ backgroundColor: RISK_COLORS[lvl], borderColor: RISK_COLORS[lvl] }}
             />
-            {lvl.replace("_", " ")}
+            {t(lvl.replace("_", " "))}
           </span>
         ))}
         <span className="ml-auto text-[9px] font-mono text-slate-600">
-          MARKERS FROM /api/risk-map
+          {t("MARKERS FROM /api/risk-map")}
         </span>
         <button className={btnGhost + " !py-0.5 !text-[9px]"} onClick={onRefresh} disabled={!onRefresh}>
-          REFRESH
+          {t("REFRESH")}
         </button>
       </div>
     </div>

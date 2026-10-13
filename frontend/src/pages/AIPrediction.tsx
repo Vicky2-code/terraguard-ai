@@ -13,11 +13,13 @@ import {
 } from "../components/ui";
 import { useApi } from "../hooks/useApi";
 import { postJSON, getJSON } from "../lib/api";
+import { useT } from "../lib/i18n";
 import type { PredictResponse, RiskMapResponse, ModelInfo } from "../lib/types";
 
 const DEFAULTS = { rainfall: 95, soil_moisture: 72, slope: 34, elevation: 1650 };
 
 export default function AIPrediction() {
+  const t = useT();
   const [form, setForm] = useState(DEFAULTS);
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export default function AIPrediction() {
       setResult(res);
     } catch (err) {
       setResult(null);
-      setError(err instanceof Error ? err.message : "prediction request failed");
+      setError(err instanceof Error ? err.message : t("prediction request failed"));
     } finally {
       setBusy(false);
     }
@@ -65,8 +67,7 @@ export default function AIPrediction() {
       />
 
       <Notice tone="amber" title="PROTOTYPE MODEL">
-        This is a deterministic weighted heuristic for demonstration. It has not been trained or
-        validated on labelled data. Accuracy metrics are NOT AVAILABLE — see Model Governance.
+        {t("This is a deterministic weighted heuristic for demonstration. It has not been trained or validated on labelled data. Accuracy metrics are NOT AVAILABLE — see Model Governance.")}
       </Notice>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
@@ -91,7 +92,7 @@ export default function AIPrediction() {
                   }
                 }}
               >
-                <option value="">PREFILL FROM A MONITORED LOCATION…</option>
+                <option value="">{t("PREFILL FROM A MONITORED LOCATION…")}</option>
                 {(locations.data?.features ?? []).map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name} ({f.state})
@@ -142,7 +143,7 @@ export default function AIPrediction() {
             </Field>
 
             <button onClick={() => void run()} disabled={busy} className={btnPrimary + " w-full"}>
-              <Play className="w-3.5 h-3.5" /> {busy ? "SCORING…" : "RUN PREDICTION"}
+              <Play className="w-3.5 h-3.5" /> {busy ? t("SCORING…") : t("RUN PREDICTION")}
             </button>
             <button
               onClick={() => {
@@ -152,11 +153,11 @@ export default function AIPrediction() {
               }}
               className={btnGhost + " w-full"}
             >
-              Reset inputs
+              {t("Reset inputs")}
             </button>
             {error && (
               <div className="text-[11px] font-mono text-red-400 border border-red-800/60 bg-red-950/30 rounded px-2 py-1.5">
-                REQUEST FAILED: {error}
+                {t("REQUEST FAILED")}: {error}
               </div>
             )}
           </div>
@@ -177,7 +178,7 @@ export default function AIPrediction() {
           {!result && !error && (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-slate-500 font-mono text-[11px]">
               <Activity className="w-6 h-6 text-slate-600" />
-              <span className="tracking-widest">AWAITING INPUT — RUN PREDICTION</span>
+              <span className="tracking-widest">{t("AWAITING INPUT — RUN PREDICTION")}</span>
             </div>
           )}
           {result && (
@@ -185,7 +186,7 @@ export default function AIPrediction() {
               <div className="rounded border border-line bg-panel2 p-3 flex items-center justify-between">
                 <div>
                   <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-                    Risk score
+                    {t("Risk score")}
                   </div>
                   <div className="text-4xl font-black font-mono text-slate-100 tabular-nums">
                     {result.risk_score}
@@ -195,7 +196,7 @@ export default function AIPrediction() {
                 <div className="text-right space-y-1.5">
                   <RiskBadge level={result.risk_level} />
                   <div className="text-[10px] font-mono text-slate-500">
-                    CONFIDENCE:{" "}
+                    {t("CONFIDENCE")}:{" "}
                     <span className="text-slate-300">
                       {result.confidence != null ? `${Math.round(result.confidence * 100)}%` : "N/A"}
                     </span>
@@ -205,22 +206,22 @@ export default function AIPrediction() {
 
               <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
                 <div className="rounded border border-line bg-panel2 px-2 py-1.5">
-                  <div className="text-slate-500">MODEL VERSION</div>
+                  <div className="text-slate-500">{t("MODEL VERSION")}</div>
                   <div className="text-slate-200">{result.model_version}</div>
                 </div>
                 <div className="rounded border border-line bg-panel2 px-2 py-1.5">
-                  <div className="text-slate-500">MODEL STATUS</div>
+                  <div className="text-slate-500">{t("MODEL STATUS")}</div>
                   <div className="text-amber-400 font-bold">{result.model_status}</div>
                 </div>
                 <div className="rounded border border-line bg-panel2 px-2 py-1.5 col-span-2">
-                  <div className="text-slate-500">TIMESTAMP</div>
+                  <div className="text-slate-500">{t("TIMESTAMP")}</div>
                   <div className="text-slate-200">{result.timestamp}</div>
                 </div>
               </div>
 
               <div>
                 <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Feature contributions
+                  {t("Feature contributions")}
                 </div>
                 <div className="space-y-1.5">
                   {result.feature_contributions.map((c) => {
@@ -258,36 +259,36 @@ export default function AIPrediction() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-3">
             <KpiCard
-              label="MODEL STATUS"
+              label={t("MODEL STATUS")}
               tone="amber"
               icon={<Cpu className="w-4 h-4" />}
               loading={models.loading}
-              value={<span className="text-lg">PROTOTYPE</span>}
-              sub="HEURISTIC — NOT A TRAINED ML MODEL"
+              value={<span className="text-lg">{t("PROTOTYPE")}</span>}
+              sub={t("HEURISTIC — NOT A TRAINED ML MODEL")}
             />
             <KpiCard
-              label="VALIDATED ACCURACY"
+              label={t("VALIDATED ACCURACY")}
               tone="red"
               icon={<Activity className="w-4 h-4" />}
               loading={models.loading}
-              value={<span className="text-sm font-bold">NOT AVAILABLE</span>}
+              value={<span className="text-sm font-bold">{t("NOT AVAILABLE")}</span>}
               sub={
                 models.error
-                  ? "/api/models UNREACHABLE"
-                  : "NO EVALUATION DATASET — NO METRIC CLAIMED"
+                  ? t("/api/models UNREACHABLE")
+                  : t("NO EVALUATION DATASET — NO METRIC CLAIMED")
               }
             />
           </div>
           <Panel title="SCORING PIPELINE" icon={<Cpu className="w-3.5 h-3.5" />}>
             <ol className="space-y-2 text-[11px] font-mono text-slate-400 list-decimal list-inside">
-              <li>Inputs validated &amp; clamped to physical ranges</li>
-              <li>Weighted features: rainfall, soil, slope, elevation</li>
-              <li>Non-linear amplification for compounding drivers</li>
-              <li>Score banded into 5 risk levels (configurable)</li>
-              <li>Per-feature contributions returned for explainability</li>
+              <li>{t("Inputs validated & clamped to physical ranges")}</li>
+              <li>{t("Weighted features: rainfall, soil, slope, elevation")}</li>
+              <li>{t("Non-linear amplification for compounding drivers")}</li>
+              <li>{t("Score banded into 5 risk levels (configurable)")}</li>
+              <li>{t("Per-feature contributions returned for explainability")}</li>
             </ol>
             <div className="mt-3 text-[10px] text-slate-600 font-mono">
-              Source code: backend/app/prediction_engine.py
+              {t("Source code")}: backend/app/prediction_engine.py
             </div>
           </Panel>
         </div>
