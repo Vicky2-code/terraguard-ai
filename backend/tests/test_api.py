@@ -530,6 +530,47 @@ class TestAlerts:
         resp = client.post("/api/alerts/999999/ack")
         assert resp.status_code == 404
 
+    def test_dispatch_creates_simulated_alert_and_broadcasts(self, client):
+        from app.events import broker
+
+        before = client.get("/api/alerts").json()["items"]
+        resp = client.post("/api/alerts/dispatch", json={"source": "manual_dispatch"})
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        # honesty contract: manual dispatch is stored, labelled and simulated
+        assert body["delivery_status"] == "SIMULATED_LOCAL"
+        assert body["simulation"] is True
+        assert body["risk_level"]
+        assert body["message"]
+
+        after = client.get("/api/alerts").json()["items"]
+        assert len(after) == len(before) + 1
+        assert any(a["id"] == body["id"] for a in after)
+
+        # it reaches the real-time stream as an alert_created event
+        events = broker.history_since(0)
+        assert any(
+            e["type"] == "alert_created" and e["data"].get("id") == body["id"]
+            for e in events
+        )
+
+    def test_dispatch_accepts_location_name_and_level(self, client):
+        first = client.post("/api/alerts/dispatch", json={}).json()
+        name = first["location_name"]
+        assert name
+        resp = client.post(
+            "/api/alerts/dispatch",
+            json={"location_name": name, "risk_level": "CRITICAL"},
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["location_name"] == name
+        assert resp.json()["risk_level"] == "CRITICAL"
+
+    def test_dispatch_with_empty_body(self, client):
+        resp = client.post("/api/alerts/dispatch")
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["simulation"] is True
+
 
 # ------------------------------------------------------------------ export
 

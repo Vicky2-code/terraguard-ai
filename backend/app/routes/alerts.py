@@ -54,6 +54,20 @@ class AlertPatch(BaseModel):
     note: str | None = None
 
 
+class DispatchPayload(BaseModel):
+    """Manual dispatch for the live-notification demo.
+
+    Creates a stored, clearly-labelled SIMULATED_LOCAL alert and broadcasts it
+    over SSE. Nothing is sent to any external channel (no SMS/email/siren).
+    """
+
+    location_id: int | None = None
+    location_name: str | None = None
+    risk_level: str | None = None
+    message: str | None = None
+    source: str | None = None  # free-text label, e.g. "offline_gateway"
+
+
 def _thresholds_response(db) -> dict:
     from app.services.common import get_setting
 
@@ -149,6 +163,57 @@ def put_thresholds(payload: ThresholdsPayload, db=Depends(get_db)):
     # re-evaluate alerts against the new thresholds immediately
     evaluate_alerts(db)
     return _thresholds_response(db)
+
+
+@router.post("/dispatch")
+def dispatch_alert(payload: DispatchPayload | None = None, db=Depends(get_db)):
+    """Create + broadcast an alert for the real-time notification demo.
+
+    Honest by design: the record is flagged ``simulation=True`` with
+    ``delivery_status=SIMULATED_LOCAL``. No external notification is delivered;
+    this exists so operators (and jury demos) can trigger the live alert
+    pipeline on demand, online or from an offline client.
+    """
+    payload = payload or DispatchPayload()
+    loc = None
+    if payload.location_id is not None:
+        loc = db.get(Location, payload.location_id)
+    if loc is None and payload.location_name:
+        loc = (
+            db.query(Location)
+            .filter(Location.name.ilike(payload.location_name))
+            .first()
+        )
+    if loc is None:
+        loc = db.query(Location).order_by(Location.risk_score.desc()).first()
+    if loc is None:
+        raise HTTPException(status_code=404, detail="No locations available to alert")
+
+    level = (payload.risk_level or loc.risk_level or "HIGH").strip().upper()
+    now = utcnow()
+    message = payload.message or (
+        f"DEMO ALERT - simulated {level} risk dispatch for {loc.name}, {loc.state}. "
+        "Generated for the live notification demo; no external channel contacted."
+    )
+    alert = Alert(
+        location_id=loc.id,
+        risk_score=float(loc.risk_score or 0),
+        severity=level,
+        risk_level=level,
+        trigger=payload.source or "manual_dispatch",
+        message=message,
+        status="active",
+        delivery_status="SIMULATED_LOCAL",
+        simulation=True,
+        created_at=now,
+        updated_at=now,
+    )
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+    data = alert_dict(alert, loc.name)
+    broker.publish("alert_created", data)
+    return data
 
 
 @router.post("/{alert_id}/ack")

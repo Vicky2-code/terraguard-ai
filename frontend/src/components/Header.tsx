@@ -14,6 +14,7 @@ import { useLive } from "../hooks/useLive";
 import { btnDanger, btnGhost, Notice, Panel } from "./ui";
 import { useT } from "../lib/i18n";
 import { LangSwitcher } from "./LangSwitcher";
+import { NotificationBell } from "./NotificationBell";
 
 export interface HeaderProps {
   onToggleSidebar: () => void;
@@ -244,6 +245,8 @@ export function Header({ onToggleSidebar, scenario, user, onSignOut }: HeaderPro
           )}
 
           <LangSwitcher compact />
+
+          <NotificationBell />
 
           <div className="hidden md:flex items-center gap-2 pl-2 border-l border-line">
             <div className="flex items-center gap-1.5 text-slate-400">

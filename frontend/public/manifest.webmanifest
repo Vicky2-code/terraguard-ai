@@ -1,0 +1,18 @@
+{
+  "name": "TerraGuard AI — Disaster Response Command Center",
+  "short_name": "TerraGuard AI",
+  "description": "Real-time disaster alerting for Northeast India: live risk map, early alerts, incident management and explainable prototype risk scoring.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#06130c",
+  "theme_color": "#06130c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

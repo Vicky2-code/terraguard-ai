@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LiveProvider } from "./hooks/useLive";
+import { NotificationProvider } from "./lib/notifications";
 import { AppShell } from "./components/AppShell";
 import Dashboard from "./pages/Dashboard";
 import AIPrediction from "./pages/AIPrediction";
@@ -52,37 +53,39 @@ function NotFound() {
 export default function App() {
   return (
     <LiveProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route element={<AppShell />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/ai-prediction" element={<AIPrediction />} />
-            <Route path="/early-alerts" element={<EarlyAlerts />} />
-            <Route path="/gis-monitor" element={<GisMonitor />} />
-            <Route path="/weather-radar" element={<WeatherRadar />} />
-            <Route path="/soil-moisture" element={<SoilMoisture />} />
-            <Route path="/report-incident" element={<ReportIncident />} />
-            <Route path="/field-incidents" element={<FieldIncidents />} />
-            <Route path="/road-corridors" element={<RoadCorridors />} />
-            <Route path="/critical-infrastructure" element={<CriticalInfrastructure />} />
-            <Route path="/risk-analytics" element={<RiskAnalytics />} />
-            <Route path="/risk-simulator" element={<RiskSimulator />} />
-            <Route path="/model-analysis" element={<ModelAnalysis />} />
-            <Route path="/temporal-analysis" element={<TemporalAnalysis />} />
-            <Route path="/report-export" element={<ReportExport />} />
-            <Route path="/incident-reports" element={<IncidentReports />} />
-            <Route path="/analytics-reports" element={<AnalyticsReports />} />
-            <Route path="/model-governance" element={<ModelGovernance />} />
-            <Route path="/data-pipeline" element={<DataPipeline />} />
-            <Route path="/admin-data" element={<AdminData />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route element={<AppShell />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/ai-prediction" element={<AIPrediction />} />
+              <Route path="/early-alerts" element={<EarlyAlerts />} />
+              <Route path="/gis-monitor" element={<GisMonitor />} />
+              <Route path="/weather-radar" element={<WeatherRadar />} />
+              <Route path="/soil-moisture" element={<SoilMoisture />} />
+              <Route path="/report-incident" element={<ReportIncident />} />
+              <Route path="/field-incidents" element={<FieldIncidents />} />
+              <Route path="/road-corridors" element={<RoadCorridors />} />
+              <Route path="/critical-infrastructure" element={<CriticalInfrastructure />} />
+              <Route path="/risk-analytics" element={<RiskAnalytics />} />
+              <Route path="/risk-simulator" element={<RiskSimulator />} />
+              <Route path="/model-analysis" element={<ModelAnalysis />} />
+              <Route path="/temporal-analysis" element={<TemporalAnalysis />} />
+              <Route path="/report-export" element={<ReportExport />} />
+              <Route path="/incident-reports" element={<IncidentReports />} />
+              <Route path="/analytics-reports" element={<AnalyticsReports />} />
+              <Route path="/model-governance" element={<ModelGovernance />} />
+              <Route path="/data-pipeline" element={<DataPipeline />} />
+              <Route path="/admin-data" element={<AdminData />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
     </LiveProvider>
   );
 }
