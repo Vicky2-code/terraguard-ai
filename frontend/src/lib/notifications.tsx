@@ -25,6 +25,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { apiUrl, getToken } from "./api";
 import { useLive, type LiveEvent } from "../hooks/useLive";
 
@@ -212,6 +213,9 @@ function unwrapEventData(evt: LiveEvent): unknown {
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { lastEvent, status } = useLive();
+  const { pathname } = useLocation();
+  // Don't run the automatic demo cadence on the auth screens.
+  const onAuthScreen = pathname === "/login" || pathname === "/register";
   const [permission, setPermission] = useState<NotifyPermission>(perm);
   const [browserEnabled, setBrowserEnabledState] = useState(() => readBool(ENABLED_KEY, false));
   const [soundEnabled, setSoundEnabledState] = useState(() => readBool(SOUND_KEY, true));
@@ -440,7 +444,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   // ---- automatic alert cadence (no button needed) ----
   useEffect(() => {
-    if (!autoAlerts) return;
+    if (!autoAlerts || onAuthScreen) return;
     if (autoCount.current >= AUTO_MAX_PER_SESSION) return;
     let cancelled = false;
     const tick = () => {
@@ -457,7 +461,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(first);
       window.clearInterval(interval);
     };
-  }, [autoAlerts, isEffectivelyOffline]);
+  }, [autoAlerts, isEffectivelyOffline, onAuthScreen]);
 
   const requestPermission = useCallback(async (): Promise<NotifyPermission> => {
     if (!("Notification" in window)) {
