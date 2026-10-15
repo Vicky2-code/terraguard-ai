@@ -176,10 +176,16 @@ export function NotificationBell() {
               label={t("Alert sound")}
             />
             <Switch
-              on={n.offlineAuto}
-              onClick={() => n.setOfflineAuto(!n.offlineAuto)}
-              label={t("Offline auto-alerts")}
+              on={n.autoAlerts}
+              onClick={() => n.setAutoAlerts(!n.autoAlerts)}
+              label={t("Auto alerts")}
             />
+            {n.autoAlerts && (
+              <p className="text-[9px] font-mono text-slate-500 leading-snug pt-0.5">
+                {t("Automatic alerts every")} {n.autoSeconds}s —{" "}
+                {t("online via server broadcast, offline generated locally.")}
+              </p>
+            )}
             {!n.online && (
               <p className="flex items-center gap-1.5 text-[9px] font-mono text-amber-400 pt-0.5">
                 <WifiOff className="w-3 h-3" />

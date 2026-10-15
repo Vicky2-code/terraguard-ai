@@ -4,10 +4,12 @@
  * - Listens to the SSE `alert_created` / `incident_created` events and turns
  *   them into: an in-app toast, a system notification (via the service worker)
  *   and an optional audible chime.
+ * - Automatic engine (no button needed): on an interval it raises an alert by
+ *   itself — when online it dispatch-messages the backend (`auto_scheduler`),
+ *   which persists + broadcasts over SSE; when offline it generates a
+ *   clearly-labelled local simulated alert. Either way a pop-up appears.
  * - Works offline: system notifications are rendered locally by the service
- *   worker (no server push required), an explicit "send test alert" fires the
- *   same pipeline, and while the browser is offline a clearly-labelled local
- *   simulated alert is generated on an interval so the demo keeps working.
+ *   worker (no server push required) and the auto engine keeps firing.
  *
  * Everything raised here is labelled SIMULATED_LOCAL / DEMO. No SMS, email,
  * siren or remote push is ever delivered.
@@ -45,13 +47,15 @@ interface NotificationContextValue {
   permission: NotifyPermission;
   browserEnabled: boolean;
   soundEnabled: boolean;
-  offlineAuto: boolean;
+  autoAlerts: boolean;
+  /** Auto-alert cadence in seconds (displayed in the UI). */
+  autoSeconds: number;
   online: boolean;
   items: NotificationItem[];
   unread: number;
   setBrowserEnabled: (v: boolean) => void;
   setSoundEnabled: (v: boolean) => void;
-  setOfflineAuto: (v: boolean) => void;
+  setAutoAlerts: (v: boolean) => void;
   requestPermission: () => Promise<NotifyPermission>;
   sendTest: () => Promise<{ ok: boolean; offline: boolean }>;
   markAllRead: () => void;
@@ -63,10 +67,13 @@ const NotificationContext = createContext<NotificationContextValue | null>(null)
 const ITEMS_KEY = "tg_notifications";
 const ENABLED_KEY = "tg_notify";
 const SOUND_KEY = "tg_notify_sound";
-const OFFLINE_KEY = "tg_notify_offline";
+const AUTO_KEY = "tg_notify_auto";
 const MAX_ITEMS = 40;
 const TOAST_MS = 9000;
-const OFFLINE_INTERVAL_MS = 15000;
+/** Automatic alert cadence: first pop shortly after load, then every interval. */
+const AUTO_INTERVAL_MS = 30000;
+const AUTO_FIRST_DELAY_MS = 8000;
+const AUTO_MAX_PER_SESSION = 60;
 
 /** Demo alert templates used for the offline generator / fallback. */
 const OFFLINE_TEMPLATES: { title: string; body: string; level: string; location: string }[] = [
@@ -189,12 +196,26 @@ async function showSystemNotification(title: string, body: string, tag: string) 
   }
 }
 
+/**
+ * The SSE broker frames each event as `{"type", "data", "ts"}`, and useLive
+ * hands that whole object back as `LiveEvent.data`. Unwrap the inner payload so
+ * handlers see the actual record (alert/incident), while still tolerating an
+ * already-flat payload.
+ */
+function unwrapEventData(evt: LiveEvent): unknown {
+  const d = evt.data as Record<string, unknown> | null;
+  if (d && typeof d === "object" && "data" in d && "type" in d) {
+    return (d as { data: unknown }).data;
+  }
+  return evt.data;
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { lastEvent, status } = useLive();
   const [permission, setPermission] = useState<NotifyPermission>(perm);
   const [browserEnabled, setBrowserEnabledState] = useState(() => readBool(ENABLED_KEY, false));
   const [soundEnabled, setSoundEnabledState] = useState(() => readBool(SOUND_KEY, true));
-  const [offlineAuto, setOfflineAutoState] = useState(() => readBool(OFFLINE_KEY, true));
+  const [autoAlerts, setAutoAlertsState] = useState(() => readBool(AUTO_KEY, true));
   const [items, setItems] = useState<NotificationItem[]>(readItems);
   const [toasts, setToasts] = useState<NotificationItem[]>([]);
   const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
@@ -230,10 +251,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (v) playChime("HIGH"); // unlock audio on the user gesture
   }, []);
 
-  const setOfflineAuto = useCallback((v: boolean) => {
-    setOfflineAutoState(v);
+  const setAutoAlerts = useCallback((v: boolean) => {
+    setAutoAlertsState(v);
     try {
-      localStorage.setItem(OFFLINE_KEY, v ? "1" : "0");
+      localStorage.setItem(AUTO_KEY, v ? "1" : "0");
     } catch {
       /* noop */
     }
@@ -269,7 +290,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const handleEvent = useCallback(
     (evt: LiveEvent) => {
       if (evt.type === "alert_created") {
-        const a = evt.data as {
+        const a = unwrapEventData(evt) as {
           id?: number;
           location_name?: string;
           risk_level?: string;
@@ -291,7 +312,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           offline: false,
         });
       } else if (evt.type === "incident_created") {
-        const i = evt.data as {
+        const i = unwrapEventData(evt) as {
           id?: number;
           public_id?: string;
           type?: string;
@@ -355,13 +376,88 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // ---- offline generator: keep alerting with no network ----
+  // ---- shared remote dispatch (used by the button AND the auto engine) ----
+  const dispatchRemote = useCallback(
+    async (source: string): Promise<boolean> => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) return false;
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        const token = getToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+        const res = await fetch(apiUrl("/api/alerts/dispatch"), {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ source }),
+        });
+        if (!res.ok) return false;
+        const data = (await res.json()) as {
+          id?: number;
+          location_name?: string;
+          risk_level?: string;
+          message?: string;
+          simulation?: boolean;
+        };
+        const key = `alert-${data.id ?? Date.now()}`;
+        if (!seen.current.has(key)) {
+          seen.current.add(key);
+          emit({
+            id: key,
+            title: `ALERT — ${(data.risk_level || "HIGH").replace("_", " ")}`,
+            body:
+              data.message ||
+              `Risk threshold exceeded at ${data.location_name || "a monitored location"}.`,
+            level: data.risk_level || "HIGH",
+            location: data.location_name || "",
+            at: Date.now(),
+            simulation: Boolean(data.simulation),
+            offline: false,
+          });
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [emit],
+  );
+
+  // Automatic engine: online -> server dispatch (persisted + broadcast over SSE
+  // to every connected client); offline -> locally generated SIMULATED_LOCAL
+  // alert. Either way the pop-up appears without anyone clicking a button.
+  const triggerAuto = useCallback(async () => {
+    const delivered = await dispatchRemote("auto_scheduler");
+    if (!delivered) emitOffline();
+  }, [dispatchRemote, emitOffline]);
+
+  const autoCount = useRef(0);
+
+  // Keep the latest trigger in a ref so preference toggles don't restart the
+  // cadence (which would fire an extra "first" alert).
+  const triggerAutoRef = useRef(triggerAuto);
   useEffect(() => {
-    if (!offlineAuto || !isEffectivelyOffline) return;
-    emitOffline();
-    const id = window.setInterval(emitOffline, OFFLINE_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [offlineAuto, isEffectivelyOffline, emitOffline]);
+    triggerAutoRef.current = triggerAuto;
+  }, [triggerAuto]);
+
+  // ---- automatic alert cadence (no button needed) ----
+  useEffect(() => {
+    if (!autoAlerts) return;
+    if (autoCount.current >= AUTO_MAX_PER_SESSION) return;
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled || autoCount.current >= AUTO_MAX_PER_SESSION) return;
+      autoCount.current += 1;
+      void triggerAutoRef.current();
+    };
+    // Quick first pop so a demo shows an alert without waiting a full cycle.
+    const delay = isEffectivelyOffline ? 1500 : AUTO_FIRST_DELAY_MS;
+    const first = window.setTimeout(tick, delay);
+    const interval = window.setInterval(tick, AUTO_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(first);
+      window.clearInterval(interval);
+    };
+  }, [autoAlerts, isEffectivelyOffline]);
 
   const requestPermission = useCallback(async (): Promise<NotifyPermission> => {
     if (!("Notification" in window)) {
@@ -379,50 +475,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, [setBrowserEnabled]);
 
   const sendTest = useCallback(async (): Promise<{ ok: boolean; offline: boolean }> => {
-    // Try the backend first (works when reachable, online or via cached auth).
-    if (navigator.onLine) {
-      try {
-        const res = await fetch(apiUrl("/api/alerts/dispatch"), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
-          },
-          body: JSON.stringify({ source: "manual_dispatch" }),
-        });
-        if (res.ok) {
-          const data = (await res.json()) as {
-            id?: number;
-            location_name?: string;
-            risk_level?: string;
-            message?: string;
-            simulation?: boolean;
-          };
-          const key = `alert-${data.id ?? Date.now()}`;
-          if (!seen.current.has(key)) {
-            seen.current.add(key);
-            emit({
-              id: key,
-              title: `ALERT — ${(data.risk_level || "HIGH").replace("_", " ")}`,
-              body:
-                data.message ||
-                `Risk threshold exceeded at ${data.location_name || "a monitored location"}.`,
-              level: data.risk_level || "HIGH",
-              location: data.location_name || "",
-              at: Date.now(),
-              simulation: Boolean(data.simulation),
-              offline: false,
-            });
-          }
-          return { ok: true, offline: false };
-        }
-      } catch {
-        /* fall through to offline */
-      }
-    }
+    const delivered = await dispatchRemote("manual_dispatch");
+    if (delivered) return { ok: true, offline: false };
     emitOffline();
     return { ok: true, offline: true };
-  }, [emit, emitOffline]);
+  }, [dispatchRemote, emitOffline]);
 
   const markAllRead = useCallback(() => {
     setItems((prev) => {
@@ -446,13 +503,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     permission,
     browserEnabled,
     soundEnabled,
-    offlineAuto,
+    autoAlerts,
+    autoSeconds: Math.round(AUTO_INTERVAL_MS / 1000),
     online: !isEffectivelyOffline,
     items,
     unread,
     setBrowserEnabled,
     setSoundEnabled,
-    setOfflineAuto,
+    setAutoAlerts,
     requestPermission,
     sendTest,
     markAllRead,
