@@ -83,6 +83,10 @@ All endpoints below are prefixed with `/api` unless stated otherwise. All respon
 
 - `GET /api/alerts?status=&level=` → `{items: [{id, location_id, location_name, risk_level, risk_score,
   trigger, message, status, delivery_status, created_at, updated_at}], meta}`
+- `POST /api/alerts/dispatch` body `{source?: string}` (no auth required, matching the open
+  read/write demo pattern) → `200` with the created alert. Persists a demo alert flagged
+  `simulation: true`, `delivery_status: "SIMULATED_LOCAL"` and publishes `alert_created` over
+  SSE. Used by the in-app automatic cadence and the "Send test alert" control.
 - Threshold evaluation happens server-side after each risk run; dedupe: one open alert per
   `(location_id, risk_level)` until it resolves. Delivery status is honestly reported
   (`SIMULATED_LOCAL` when no provider configured).

@@ -361,7 +361,7 @@ export function ScenarioBanner({
       <div className="space-y-2">
         <Notice tone="purple" title="SIMULATION MODE">
           {t(
-            "Scripted simulation — risk changes, alerts and timeline events are synthetic and flagged SIMULATED_LOCAL. No real notifications are delivered.",
+            "Scripted simulation — risk changes, alerts and timeline events are synthetic and flagged SIMULATED_LOCAL. No real SMS, email, siren or remote push is sent.",
           )}
         </Notice>
         {error && <div className="text-[11px] font-mono text-red-400">{error}</div>}

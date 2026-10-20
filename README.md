@@ -62,8 +62,9 @@ so evaluators can explore immediately. Signing in unlocks role-aware controls
 1. **Dashboard** (`/dashboard`) — KPIs stream from `GET /api/dashboard`; live clock, `LIVE` /
    `SYNCED` / `DATA STALE` header states, risk map, timeline, priority queue.
 2. **Run Emergency Scenario** (top-right red button) — read the confirmation modal
-   (**SIMULATION MODE**, no real notifications), confirm, watch risk changes, alerts and timeline
-   events arrive live. Pause / resume / reset from the dashboard banner.
+   (**SIMULATION MODE**, no SMS/email sent), confirm, watch risk changes, alerts and timeline
+   events arrive live, and see alert pop-ups appear automatically. Pause / resume / reset from
+   the dashboard banner.
 3. **GIS Monitor** — zoom, pan, hover tooltips, filter by 5 risk levels, click markers.
 4. **Report Incident** — file an incident; it persists in the database and instantly appears on
    the Dashboard, Field Incidents and the map.
@@ -133,6 +134,26 @@ FastAPI → DB (risk + alert jobs) → GET /api/stream (SSE) → React hook
 Header states: `CONNECTED` (SSE open), `RECONNECTING`, `OFFLINE`, `SYNCED <time>`,
 `DATA STALE` (no contact for 90 s). Transport indicator shows `SSE` or `POLL`.
 
+### Alert notifications (online + offline)
+
+Alerts are raised **automatically** — no button needed — and surface through one pipeline:
+an in-app toast, an optional system notification, and an optional chime.
+
+- **Automatic cadence:** an in-app engine raises an alert shortly after load (~8 s) and then every
+  30 s. When online it calls `POST /api/alerts/dispatch`, so the backend persists it and
+  broadcasts it over SSE to every connected client. When offline it generates a clearly-labelled
+  `OFFLINE · SIMULATED_LOCAL` alert locally. Toggle in the header bell (`Auto alerts`).
+- **Server events:** `alert_created` / `incident_created` SSE events are deduplicated by id and
+  rendered the same way.
+- **Offline support:** a service worker (`frontend/public/sw.js`) caches the app shell
+  (network-first, cache fallback, never `/api/` or cross-origin) and renders system
+  notifications **locally** via `showNotification` — no Web Push/VAPID required. The UI keeps
+  loading and alerting with the network fully disconnected.
+- **Honest labelling:** every demo alert is `SIMULATED_LOCAL`; no SMS, email, siren or remote
+  push is ever delivered.
+
+Full design write-up: [`docs/realtime-alerts.md`](docs/realtime-alerts.md).
+
 ---
 
 ## Deployment
@@ -159,13 +180,16 @@ cd backend  && pytest                                          # API contract te
 ## Repository layout
 
 ```
-backend/app/          FastAPI app, routers, engine, scheduler, models, seeds
-frontend/src/
-  components/         AppShell, Header, Sidebar, RiskMap, shared UI kit
-  hooks/              useApi (load/error/retry), useLive (SSE+poll), useScenario, useClock
-  lib/                api client, shared types
-  pages/              one file per sidebar module (20 routes)
-docs/api-contract.md  API contract
+backend/app/           FastAPI app, routers, engine, scheduler, models, seeds
+frontend/
+  public/              service worker (sw.js) + PWA manifest
+  src/
+    components/        AppShell, Header, Sidebar, RiskMap, NotificationBell, shared UI kit
+    hooks/             useApi (load/error/retry), useLive (SSE+poll), useScenario, useClock
+    lib/               api client, shared types, notifications (auto engine + offline)
+    pages/             one file per sidebar module (20 routes)
+docs/api-contract.md   API contract
+docs/realtime-alerts.md  Online/offline alert notification design
 ```
 
 ## Known limitations
